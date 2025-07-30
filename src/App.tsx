@@ -65,18 +65,22 @@ function App() {
     setError('');
 
     try {
-      // Call LangFlow API
-      const response = await fetch(`${import.meta.env.VITE_LANGFLOW_URL}?stream=false`, {
+      // Call LangFlow API with correct payload structure
+      const payload = {
+        "input_value": url,
+        "output_type": "chat",
+        "input_type": "chat",
+        // Optional: Use session tracking if needed
+        "session_id": "user_1"
+      };
+
+      const response = await fetch(import.meta.env.VITE_LANGFLOW_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`
         },
-        body: JSON.stringify({
-          input_value: url,
-          output_type: "chat",
-          input_type: "chat"
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
@@ -113,18 +117,21 @@ function App() {
     
     setIsLoading(true);
     try {
-      // Call LangFlow API for variation
-      const response = await fetch(`${import.meta.env.VITE_LANGFLOW_URL}?stream=false`, {
+      // Call LangFlow API for variation with correct payload
+      const payload = {
+        "input_value": url + " (generate a different variation)",
+        "output_type": "chat",
+        "input_type": "chat",
+        "session_id": "user_1"
+      };
+
+      const response = await fetch(import.meta.env.VITE_LANGFLOW_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`
         },
-        body: JSON.stringify({
-          input_value: url + " (generate a different variation)",
-          output_type: "chat",
-          input_type: "chat"
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
