@@ -11,8 +11,48 @@ interface RecentUrl {
   timestamp: Date;
 }
 
+interface PostTemplate {
+  id: string;
+  name: string;
+  description: string;
+  prompt: string;
+}
+
+const POST_TEMPLATES: PostTemplate[] = [
+  {
+    id: 'professional',
+    name: 'Professional Insight',
+    description: 'Formal, analytical tone with key takeaways',
+    prompt: 'Create a professional LinkedIn post that provides analytical insights and key takeaways from this article. Use a formal, business-appropriate tone.'
+  },
+  {
+    id: 'storytelling',
+    name: 'Personal Story',
+    description: 'Engaging narrative with personal connection',
+    prompt: 'Create a LinkedIn post that tells a compelling story based on this article. Make it personal and relatable, connecting the content to real-world experiences.'
+  },
+  {
+    id: 'thought-leadership',
+    name: 'Thought Leadership',
+    description: 'Industry expertise with forward-thinking perspective',
+    prompt: 'Create a thought leadership LinkedIn post that demonstrates industry expertise and provides a forward-thinking perspective on this article. Include strategic insights.'
+  },
+  {
+    id: 'discussion',
+    name: 'Discussion Starter',
+    description: 'Engaging questions to spark conversation',
+    prompt: 'Create a LinkedIn post that sparks discussion and engagement. Include thought-provoking questions and encourage comments from your network about this article.'
+  },
+  {
+    id: 'casual',
+    name: 'Casual & Friendly',
+    description: 'Conversational tone with approachable language',
+    prompt: 'Create a casual, friendly LinkedIn post about this article. Use conversational language and an approachable tone that feels authentic and relatable.'
+  }
+];
 function App() {
   const [url, setUrl] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState<PostTemplate>(POST_TEMPLATES[0]);
   const [generatedPost, setGeneratedPost] = useState<GeneratedPost | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -62,8 +102,10 @@ function App() {
     setError('');
 
     try {
+      const templatePrompt = `${selectedTemplate.prompt}\n\nArticle URL: ${url}`;
+      
       const payload = {
-        "input_value": url,
+        "input_value": templatePrompt,
         "output_type": "chat",
         "input_type": "chat",
         "session_id": "user_1"
@@ -149,8 +191,10 @@ function App() {
     setError('');
     
     try {
+      const templatePrompt = `${selectedTemplate.prompt} (generate a different variation)\n\nArticle URL: ${url}`;
+      
       const payload = {
-        "input_value": url + " (generate a different variation)",
+        "input_value": templatePrompt,
         "output_type": "chat",
         "input_type": "chat",
         "session_id": "user_1"
@@ -271,6 +315,29 @@ function App() {
         <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-8 mb-8">
           {/* URL Input Section */}
           <div className="mb-8">
+            {/* Template Selector */}
+            <div className="mb-6">
+              <label htmlFor="template" className="block text-sm font-semibold text-gray-700 mb-3">
+                Post Style & Tone
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {POST_TEMPLATES.map((template) => (
+                  <button
+                    key={template.id}
+                    onClick={() => setSelectedTemplate(template)}
+                    className={`p-4 text-left border-2 rounded-lg transition-all duration-200 ${
+                      selectedTemplate.id === template.id
+                        ? 'border-blue-500 bg-blue-50 shadow-md'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="font-medium text-gray-900 mb-1">{template.name}</div>
+                    <div className="text-sm text-gray-600">{template.description}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <label htmlFor="url" className="block text-sm font-semibold text-gray-700 mb-3">
               Article URL
             </label>
@@ -319,7 +386,10 @@ function App() {
           {generatedPost && (
             <div className="border-t border-gray-200 pt-8">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Generated LinkedIn Post</h3>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Generated LinkedIn Post</h3>
+                  <p className="text-sm text-gray-500 mt-1">Style: {selectedTemplate.name}</p>
+                </div>
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-gray-500">
                     {generatedPost.content.length}/{MAX_CHARS} characters
