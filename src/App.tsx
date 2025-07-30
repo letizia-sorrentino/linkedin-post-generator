@@ -22,15 +22,6 @@ function App() {
 
   const MAX_CHARS = 3000;
 
-  // Mock data for demonstration
-  const mockPosts = [
-    "🚀 Just read a fascinating article about the future of AI in business transformation.\n\nKey takeaways that caught my attention:\n\n✅ Companies leveraging AI are seeing 40% faster decision-making\n✅ The human-AI collaboration model is proving more effective than full automation\n✅ Data quality remains the biggest challenge for successful AI implementation\n\nWhat struck me most: \"Technology is just a tool. The real transformation happens when people embrace new ways of working.\"\n\nThis aligns perfectly with what I've observed in my own experience. The most successful digital transformations I've witnessed weren't just about implementing new tech—they were about changing mindsets and processes.\n\nWhat's your experience with AI integration in your organization?\n\n#AI #DigitalTransformation #Leadership #BusinessStrategy",
-    
-    "💡 This article completely shifted my perspective on remote work productivity.\n\nThe research reveals something counterintuitive: the most productive remote teams aren't the ones with the most meetings—they're the ones with the clearest asynchronous communication.\n\nThree game-changing insights:\n\n🎯 Written communication quality matters more than frequency\n🎯 Trust-based management outperforms micromanagement by 67%\n🎯 Flexible schedules boost creativity and problem-solving\n\nAs someone who's managed both in-person and remote teams, this data validates what I've experienced firsthand. The best remote workers aren't necessarily the ones who respond fastest—they're the ones who communicate most thoughtfully.\n\nThe future of work isn't about where we work, it's about how we work.\n\nWhat's been your biggest lesson about remote team management?\n\n#RemoteWork #Leadership #Productivity #FutureOfWork",
-    
-    "📊 This data-driven analysis on customer retention just blew my mind.\n\nTurns out, the companies with the highest customer lifetime value aren't the ones spending most on acquisition—they're investing in post-purchase experience.\n\nThe numbers don't lie:\n\n📈 5% increase in retention = 25-95% increase in profits\n📈 Existing customers spend 67% more than new ones\n📈 Word-of-mouth from happy customers drives 50% of all purchases\n\nBut here's what really got me: the best retention strategies aren't about discounts or loyalty programs. They're about solving problems before customers even know they have them.\n\nProactive support > Reactive fixes\n\nThis completely reframes how we should think about customer success. It's not a cost center—it's the growth engine.\n\nHow has your approach to customer retention evolved?\n\n#CustomerSuccess #BusinessGrowth #DataDriven #CustomerExperience"
-  ];
-
   const isValidUrl = (string: string) => {
     try {
       new URL(string);
@@ -61,39 +52,64 @@ function App() {
       return;
     }
 
+    // Check if environment variables are configured
+    if (!import.meta.env.VITE_LANGFLOW_URL || !import.meta.env.VITE_LANGFLOW_TOKEN) {
+      setError('LangFlow API is not configured. Please check your environment variables.');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
     try {
-      // Call LangFlow API with correct payload structure
       const payload = {
         "input_value": url,
         "output_type": "chat",
         "input_type": "chat",
-        // Optional: Use session tracking if needed
         "session_id": "user_1"
       };
 
-      const response = await fetch(import.meta.env.VITE_LANGFLOW_URL, {
+      const options = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`
         },
         body: JSON.stringify(payload)
-      });
+      };
+
+      const response = await fetch(import.meta.env.VITE_LANGFLOW_URL, options);
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`API request failed (${response.status}): ${errorText || response.statusText}`);
       }
 
       const data = await response.json();
       
       // Extract the generated content from LangFlow response
-      // You may need to adjust this based on your actual response structure
-      const generatedContent = data.outputs?.[0]?.outputs?.[0]?.results?.message?.text || 
-                              data.message || 
-                              'Generated post content here';
+      let generatedContent = '';
+      
+      if (data.outputs && data.outputs.length > 0) {
+        // Try different possible response structures
+        const output = data.outputs[0];
+        generatedContent = output.outputs?.[0]?.results?.message?.text ||
+                          output.outputs?.[0]?.results?.text ||
+                          output.outputs?.[0]?.message?.text ||
+                          output.outputs?.[0]?.text ||
+                          output.message?.text ||
+                          output.text ||
+                          '';
+      } else if (data.message) {
+        generatedContent = typeof data.message === 'string' ? data.message : data.message.text || '';
+      } else if (data.text) {
+        generatedContent = data.text;
+      }
+      
+      if (!generatedContent) {
+        console.error('Unexpected response structure:', data);
+        throw new Error('No content generated. Please check the LangFlow response format.');
+      }
       
       const newPost: GeneratedPost = {
         content: generatedContent,
@@ -104,9 +120,17 @@ function App() {
       addToRecentUrls(url);
       setPostsGeneratedToday(prev => prev + 1);
       showNotification('LinkedIn post generated successfully!');
+      
     } catch (err) {
       console.error('API Error:', err);
-      setError(`Failed to generate post: ${err instanceof Error ? err.message : 'Please try again.'}`);
+      
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        setError('Network error: Please check your internet connection and try again.');
+      } else if (err instanceof Error) {
+        setError(`Failed to generate post: ${err.message}`);
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -115,9 +139,15 @@ function App() {
   const generateVariation = async () => {
     if (!generatedPost) return;
     
+    if (!import.meta.env.VITE_LANGFLOW_URL || !import.meta.env.VITE_LANGFLOW_TOKEN) {
+      setError('LangFlow API is not configured. Please check your environment variables.');
+      return;
+    }
+    
     setIsLoading(true);
+    setError('');
+    
     try {
-      // Call LangFlow API for variation with correct payload
       const payload = {
         "input_value": url + " (generate a different variation)",
         "output_type": "chat",
@@ -125,32 +155,63 @@ function App() {
         "session_id": "user_1"
       };
 
-      const response = await fetch(import.meta.env.VITE_LANGFLOW_URL, {
+      const options = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`
         },
         body: JSON.stringify(payload)
-      });
+      };
+
+      const response = await fetch(import.meta.env.VITE_LANGFLOW_URL, options);
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`API request failed (${response.status}): ${errorText || response.statusText}`);
       }
 
       const data = await response.json();
-      const generatedContent = data.outputs?.[0]?.outputs?.[0]?.results?.message?.text || 
-                              data.message || 
-                              'Generated variation content here';
+      
+      // Extract the generated content from LangFlow response
+      let generatedContent = '';
+      
+      if (data.outputs && data.outputs.length > 0) {
+        const output = data.outputs[0];
+        generatedContent = output.outputs?.[0]?.results?.message?.text ||
+                          output.outputs?.[0]?.results?.text ||
+                          output.outputs?.[0]?.message?.text ||
+                          output.outputs?.[0]?.text ||
+                          output.message?.text ||
+                          output.text ||
+                          '';
+      } else if (data.message) {
+        generatedContent = typeof data.message === 'string' ? data.message : data.message.text || '';
+      } else if (data.text) {
+        generatedContent = data.text;
+      }
+      
+      if (!generatedContent) {
+        console.error('Unexpected response structure:', data);
+        throw new Error('No content generated. Please check the LangFlow response format.');
+      }
       
       setGeneratedPost({
         content: generatedContent,
         timestamp: new Date()
       });
       showNotification('New variation generated!');
+      
     } catch (err) {
       console.error('Variation API Error:', err);
-      setError(`Failed to generate variation: ${err instanceof Error ? err.message : 'Please try again.'}`);
+      
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        setError('Network error: Please check your internet connection and try again.');
+      } else if (err instanceof Error) {
+        setError(`Failed to generate variation: ${err.message}`);
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
