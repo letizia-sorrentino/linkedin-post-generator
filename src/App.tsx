@@ -15,7 +15,7 @@ interface PostTemplate {
   id: string;
   name: string;
   description: string;
-  prompt: string;
+  style: string;
 }
 
 const POST_TEMPLATES: PostTemplate[] = [
@@ -23,31 +23,31 @@ const POST_TEMPLATES: PostTemplate[] = [
     id: 'professional',
     name: 'Professional Insight',
     description: 'Formal, analytical tone with key takeaways',
-    prompt: 'Create a professional LinkedIn post that provides analytical insights and key takeaways from this article. Use a formal, business-appropriate tone. Include 2-3 bullet points with key insights. End with a thought-provoking question.'
+    style: 'professional'
   },
   {
     id: 'storytelling',
     name: 'Personal Story',
     description: 'Engaging narrative with personal connection',
-    prompt: 'Create a LinkedIn post that tells a compelling story based on this article. Start with "I recently came across..." and make it personal and relatable. Share a personal anecdote or experience that connects to the article content. Keep it under 1500 characters.'
+    style: 'storytelling'
   },
   {
     id: 'thought-leadership',
     name: 'Thought Leadership',
     description: 'Industry expertise with forward-thinking perspective',
-    prompt: 'Create a thought leadership LinkedIn post that demonstrates industry expertise and provides a forward-thinking perspective on this article. Include strategic insights, mention industry trends, and provide 2-3 actionable recommendations. Use confident, authoritative language.'
+    style: 'thought-leadership'
   },
   {
     id: 'discussion',
     name: 'Discussion Starter',
     description: 'Engaging questions to spark conversation',
-    prompt: 'Create a LinkedIn post that sparks discussion and engagement about this article. Start with a bold statement or surprising statistic. Include 2-3 thought-provoking questions throughout the post. End with "What are your thoughts?" or "Have you experienced this?" to encourage comments.'
+    style: 'discussion'
   },
   {
     id: 'casual',
     name: 'Casual & Friendly',
     description: 'Conversational tone with approachable language',
-    prompt: 'Create a casual, friendly LinkedIn post about this article. Use conversational language like "Hey LinkedIn fam" or "Quick thought...". Include emojis where appropriate. Keep the tone light and approachable while still being professional. Add a personal touch or opinion.'
+    style: 'casual'
   }
 ];
 function App() {
@@ -102,10 +102,9 @@ function App() {
     setError('');
 
     try {
-      const templatePrompt = `${selectedTemplate.prompt}\n\nArticle URL: ${url}`;
-      
       const payload = {
-        "input_value": templatePrompt,
+        "input_value": url,
+        "style": selectedTemplate.style,
         "output_type": "chat",
         "input_type": "chat",
         "session_id": "user_1"
@@ -191,10 +190,10 @@ function App() {
     setError('');
     
     try {
-      const templatePrompt = `${selectedTemplate.prompt} (generate a different variation)\n\nArticle URL: ${url}`;
-      
       const payload = {
-        "input_value": templatePrompt,
+        "input_value": url,
+        "style": selectedTemplate.style,
+        "variation": true,
         "output_type": "chat",
         "input_type": "chat",
         "session_id": "user_1"
