@@ -1,9 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Copy, ExternalLink, Loader2, CheckCircle, AlertCircle, History, BarChart3 } from 'lucide-react';
+import { Copy, ExternalLink, Loader2, CheckCircle, AlertCircle, History, BarChart3, Save, Star, Download, Trash2, FileText } from 'lucide-react';
 
 interface GeneratedPost {
   content: string;
   timestamp: Date;
+  id: string;
+  url?: string;
+}
+
+interface SavedDraft {
+  id: string;
+  content: string;
+  timestamp: Date;
+  url?: string;
+  title: string;
+}
+
+interface FavoritePost {
+  id: string;
+  content: string;
+  timestamp: Date;
+  url?: string;
+  title: string;
 }
 
 interface RecentUrl {
@@ -19,9 +37,69 @@ function App() {
   const [notification, setNotification] = useState('');
   const [recentUrls, setRecentUrls] = useState<RecentUrl[]>([]);
   const [postsGeneratedToday, setPostsGeneratedToday] = useState(0);
+  const [savedDrafts, setSavedDrafts] = useState<SavedDraft[]>([]);
+  const [favoritesPosts, setFavoritesPosts] = useState<FavoritePost[]>([]);
+  const [showDrafts, setShowDrafts] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
 
   const MAX_CHARS = 3000;
 
+  // Load data from localStorage on component mount
+  useEffect(() => {
+    const drafts = localStorage.getItem('linkedin-drafts');
+    const favorites = localStorage.getItem('linkedin-favorites');
+    const recentUrls = localStorage.getItem('linkedin-recent-urls');
+    const todayCount = localStorage.getItem('linkedin-posts-today');
+    
+    if (drafts) {
+      setSavedDrafts(JSON.parse(drafts).map((draft: any) => ({
+        ...draft,
+        timestamp: new Date(draft.timestamp)
+      })));
+    }
+    
+    if (favorites) {
+      setFavoritesPosts(JSON.parse(favorites).map((fav: any) => ({
+        ...fav,
+        timestamp: new Date(fav.timestamp)
+      })));
+    }
+    
+    if (recentUrls) {
+      setRecentUrls(JSON.parse(recentUrls).map((item: any) => ({
+        ...item,
+        timestamp: new Date(item.timestamp)
+      })));
+    }
+    
+    if (todayCount) {
+      const { date, count } = JSON.parse(todayCount);
+      const today = new Date().toDateString();
+      if (date === today) {
+        setPostsGeneratedToday(count);
+      } else {
+        localStorage.setItem('linkedin-posts-today', JSON.stringify({ date: today, count: 0 }));
+      }
+    }
+  }, []);
+
+  // Save to localStorage whenever data changes
+  useEffect(() => {
+    localStorage.setItem('linkedin-drafts', JSON.stringify(savedDrafts));
+  }, [savedDrafts]);
+
+  useEffect(() => {
+    localStorage.setItem('linkedin-favorites', JSON.stringify(favoritesPosts));
+  }, [favoritesPosts]);
+
+  useEffect(() => {
+    localStorage.setItem('linkedin-recent-urls', JSON.stringify(recentUrls));
+  }, [recentUrls]);
+
+  useEffect(() => {
+    const today = new Date().toDateString();
+    localStorage.setItem('linkedin-posts-today', JSON.stringify({ date: today, count: postsGeneratedToday }));
+  }, [postsGeneratedToday]);
   const isValidUrl = (string: string) => {
     try {
       new URL(string);
@@ -114,7 +192,9 @@ function App() {
       
       const newPost: GeneratedPost = {
         content: generatedContent,
-        timestamp: new Date()
+        timestamp: new Date(),
+        id: Date.now().toString(),
+        url: url
       };
 
       setGeneratedPost(newPost);
@@ -200,7 +280,9 @@ function App() {
       
       setGeneratedPost({
         content: generatedContent,
-        timestamp: new Date()
+        timestamp: new Date(),
+        id: Date.now().toString(),
+        url: url
       });
       showNotification('New variation generated!');
       
@@ -234,6 +316,91 @@ function App() {
     setUrl(selectedUrl);
   };
 
+  const saveDraft = () => {
+    if (!generatedPost) return;
+    
+    const title = generatedPost.content.substring(0, 50) + (generatedPost.content.length > 50 ? '...' : '');
+    const draft: SavedDraft = {
+      id: Date.now().toString(),
+      content: generatedPost.content,
+      timestamp: new Date(),
+      url: generatedPost.url,
+      title: title
+    };
+    
+    setSavedDrafts(prev => [draft, ...prev]);
+    showNotification('Draft saved successfully!');
+  };
+
+  const addToFavorites = () => {
+    if (!generatedPost) return;
+    
+    const title = generatedPost.content.substring(0, 50) + (generatedPost.content.length > 50 ? '...' : '');
+    const favorite: FavoritePost = {
+      id: Date.now().toString(),
+      content: generatedPost.content,
+      timestamp: new Date(),
+      url: generatedPost.url,
+      title: title
+    };
+    
+    setFavoritesPosts(prev => [favorite, ...prev]);
+    showNotification('Added to favorites!');
+  };
+
+  const loadDraft = (draft: SavedDraft) => {
+    setGeneratedPost({
+      id: draft.id,
+      content: draft.content,
+      timestamp: draft.timestamp,
+      url: draft.url
+    });
+    if (draft.url) {
+      setUrl(draft.url);
+    }
+    setShowDrafts(false);
+    showNotification('Draft loaded!');
+  };
+
+  const loadFavorite = (favorite: FavoritePost) => {
+    setGeneratedPost({
+      id: favorite.id,
+      content: favorite.content,
+      timestamp: favorite.timestamp,
+      url: favorite.url
+    });
+    if (favorite.url) {
+      setUrl(favorite.url);
+    }
+    setShowFavorites(false);
+    showNotification('Favorite loaded!');
+  };
+
+  const deleteDraft = (id: string) => {
+    setSavedDrafts(prev => prev.filter(draft => draft.id !== id));
+    showNotification('Draft deleted');
+  };
+
+  const deleteFavorite = (id: string) => {
+    setFavoritesPosts(prev => prev.filter(fav => fav.id !== id));
+    showNotification('Removed from favorites');
+  };
+
+  const exportPost = () => {
+    if (!generatedPost) return;
+    
+    const content = `LinkedIn Post - Generated ${generatedPost.timestamp.toLocaleString()}\n\n${generatedPost.content}\n\n${generatedPost.url ? `Source: ${generatedPost.url}` : ''}`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `linkedin-post-${Date.now()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showNotification('Post exported successfully!');
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Notification */}
@@ -265,6 +432,34 @@ function App() {
             <span className="font-medium">{postsGeneratedToday}</span>
             <span className="text-sm">posts generated today</span>
           </div>
+          <div className="flex items-center gap-2 text-gray-600">
+            <FileText className="w-5 h-5" />
+            <span className="font-medium">{savedDrafts.length}</span>
+            <span className="text-sm">saved drafts</span>
+          </div>
+          <div className="flex items-center gap-2 text-gray-600">
+            <Star className="w-5 h-5" />
+            <span className="font-medium">{favoritesPosts.length}</span>
+            <span className="text-sm">favorites</span>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-center gap-4 mb-8">
+          <button
+            onClick={() => setShowDrafts(!showDrafts)}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+          >
+            <FileText className="w-4 h-4" />
+            Drafts ({savedDrafts.length})
+          </button>
+          <button
+            onClick={() => setShowFavorites(!showFavorites)}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+          >
+            <Star className="w-4 h-4" />
+            Favorites ({favoritesPosts.length})
+          </button>
         </div>
 
         {/* Main Card */}
@@ -333,6 +528,27 @@ function App() {
                       Generate Another Version
                     </button>
                     <button
+                      onClick={saveDraft}
+                      className="px-4 py-2 text-green-600 border border-green-200 hover:bg-green-50 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium"
+                    >
+                      <Save className="w-4 h-4" />
+                      Save Draft
+                    </button>
+                    <button
+                      onClick={addToFavorites}
+                      className="px-4 py-2 text-yellow-600 border border-yellow-200 hover:bg-yellow-50 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium"
+                    >
+                      <Star className="w-4 h-4" />
+                      Favorite
+                    </button>
+                    <button
+                      onClick={exportPost}
+                      className="px-4 py-2 text-purple-600 border border-purple-200 hover:bg-purple-50 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium"
+                    >
+                      <Download className="w-4 h-4" />
+                      Export
+                    </button>
+                    <button
                       onClick={copyToClipboard}
                       className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium shadow-md hover:shadow-lg"
                     >
@@ -361,6 +577,93 @@ function App() {
             </div>
           )}
         </div>
+
+        {/* Saved Drafts */}
+        {showDrafts && (
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-6 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Saved Drafts</h3>
+              <button
+                onClick={() => setShowDrafts(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            {savedDrafts.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">No saved drafts yet</p>
+            ) : (
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {savedDrafts.map((draft) => (
+                  <div key={draft.id} className="flex items-start justify-between p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                    <div className="flex-1 cursor-pointer" onClick={() => loadDraft(draft)}>
+                      <h4 className="font-medium text-gray-900 mb-1">{draft.title}</h4>
+                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">{draft.content.substring(0, 100)}...</p>
+                      <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <span>{draft.timestamp.toLocaleString()}</span>
+                        {draft.url && <span className="truncate max-w-xs">{draft.url}</span>}
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteDraft(draft.id);
+                      }}
+                      className="ml-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Favorites */}
+        {showFavorites && (
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-6 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Favorite Posts</h3>
+              <button
+                onClick={() => setShowFavorites(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            {favoritesPosts.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">No favorite posts yet</p>
+            ) : (
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {favoritesPosts.map((favorite) => (
+                  <div key={favorite.id} className="flex items-start justify-between p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                    <div className="flex-1 cursor-pointer" onClick={() => loadFavorite(favorite)}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                        <h4 className="font-medium text-gray-900">{favorite.title}</h4>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">{favorite.content.substring(0, 100)}...</p>
+                      <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <span>{favorite.timestamp.toLocaleString()}</span>
+                        {favorite.url && <span className="truncate max-w-xs">{favorite.url}</span>}
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteFavorite(favorite.id);
+                      }}
+                      className="ml-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Recent URLs */}
         {recentUrls.length > 0 && (
