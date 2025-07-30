@@ -186,6 +186,9 @@ function App() {
       const response = await fetch('/api/langflow/lf/54425f0a-4d1c-4195-9f8a-fe76ce2c72cf/api/v1/run/b8366bbf-3b78-46a1-b603-c6c30863a697', options);
       
       if (!response.ok) {
+        if (response.status === 504) {
+          throw new Error('The request timed out. The AI service is taking longer than expected to respond. Please try again in a moment.');
+        }
         const errorText = await response.text();
         throw new Error(`API request failed (${response.status}): ${errorText || response.statusText}`);
       }
@@ -275,6 +278,9 @@ function App() {
       const response = await fetch('/api/langflow/lf/54425f0a-4d1c-4195-9f8a-fe76ce2c72cf/api/v1/run/b8366bbf-3b78-46a1-b603-c6c30863a697', options);
       
       if (!response.ok) {
+        if (response.status === 504) {
+          throw new Error('The request timed out. The AI service is taking longer than expected to respond. Please try again in a moment.');
+        }
         const errorText = await response.text();
         throw new Error(`API request failed (${response.status}): ${errorText || response.statusText}`);
       }
