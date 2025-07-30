@@ -73,8 +73,10 @@ function App() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`
+          'Authorization': `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`,
+          'Accept': 'application/json'
         },
+        mode: 'cors' as RequestMode,
         body: JSON.stringify(payload)
       };
 
@@ -124,8 +126,8 @@ function App() {
     } catch (err) {
       console.error('API Error:', err);
       
-      if (err instanceof TypeError && err.message.includes('fetch')) {
-        setError('Network error: Please check your internet connection and try again.');
+      if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
+        setError('Connection failed: This may be due to CORS restrictions or network issues. Try using a CORS browser extension or check if the API endpoint is accessible.');
       } else if (err instanceof Error) {
         setError(`Failed to generate post: ${err.message}`);
       } else {
@@ -159,8 +161,10 @@ function App() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`
+          'Authorization': `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`,
+          'Accept': 'application/json'
         },
+        mode: 'cors' as RequestMode,
         body: JSON.stringify(payload)
       };
 
@@ -205,8 +209,8 @@ function App() {
     } catch (err) {
       console.error('Variation API Error:', err);
       
-      if (err instanceof TypeError && err.message.includes('fetch')) {
-        setError('Network error: Please check your internet connection and try again.');
+      if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
+        setError('Connection failed: This may be due to CORS restrictions or network issues. Try using a CORS browser extension or check if the API endpoint is accessible.');
       } else if (err instanceof Error) {
         setError(`Failed to generate variation: ${err.message}`);
       } else {
