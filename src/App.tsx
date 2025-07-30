@@ -418,7 +418,7 @@ function App() {
     URL.revokeObjectURL(url);
     showNotification('Post exported successfully!');
   };
-  return (
+
   const generateWordCloud = (text: string) => {
     if (!text) return [];
     
@@ -453,6 +453,7 @@ function App() {
     return 'bg-red-100 dark:bg-red-900';
   };
 
+  return (
     <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'dark bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' : 'bg-gradient-to-br from-blue-50 via-white to-indigo-50'}`}>
       {/* Notification */}
       {notification && (
