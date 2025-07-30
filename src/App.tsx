@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Copy, ExternalLink, Loader2, CheckCircle, AlertCircle, History, BarChart3, Save, Star, Download, Trash2, FileText, Moon, Sun, Eye } from 'lucide-react';
+import { Copy, ExternalLink, Loader2, CheckCircle, AlertCircle, History, BarChart3, Save, Star, Download, Trash2, FileText, Moon, Sun, Eye, Smile } from 'lucide-react';
 
 interface GeneratedPost {
   content: string;
@@ -43,9 +43,18 @@ function App() {
   const [showFavorites, setShowFavorites] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const MAX_CHARS = 3000;
 
+  // Common emojis for LinkedIn posts
+  const emojiCategories = {
+    'Popular': ['💡', '🚀', '💪', '🎯', '✨', '🔥', '👏', '💯', '🌟', '⚡'],
+    'Business': ['📈', '💼', '🤝', '💰', '📊', '🏆', '🎖️', '📋', '💻', '🔧'],
+    'Emotions': ['😊', '😍', '🤔', '😎', '🥳', '😤', '🤗', '😮', '🙌', '👍'],
+    'Objects': ['📱', '💡', '🔍', '📚', '🎨', '🏠', '🌍', '⏰', '📝', '🎪'],
+    'Nature': ['🌱', '🌳', '🌊', '⛰️', '🌈', '☀️', '🌙', '⭐', '🔆', '🌸']
+  };
   // Load data from localStorage on component mount
   useEffect(() => {
     const drafts = localStorage.getItem('linkedin-drafts');
@@ -419,6 +428,26 @@ function App() {
     showNotification('Post exported successfully!');
   };
 
+  const insertEmoji = (emoji: string) => {
+    if (!generatedPost) return;
+    
+    const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const newContent = generatedPost.content.substring(0, start) + emoji + generatedPost.content.substring(end);
+      
+      setGeneratedPost({ ...generatedPost, content: newContent });
+      
+      // Restore cursor position after emoji
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + emoji.length, start + emoji.length);
+      }, 0);
+    }
+    
+    setShowEmojiPicker(false);
+  };
   const generateWordCloud = (text: string) => {
     if (!text) return [];
     
@@ -652,6 +681,44 @@ function App() {
                 {/* Post Editor */}
                 <div className="lg:col-span-2">
                   <div className="relative">
+                    <div className="flex items-center gap-2 mb-2">
+                      <button
+                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                        className="flex items-center gap-1 px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+                      >
+                        <Smile className="w-4 h-4" />
+                        Emojis
+                      </button>
+                      {showEmojiPicker && (
+                        <div className="absolute top-8 left-0 z-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg p-4 w-80">
+                          <div className="space-y-3">
+                            {Object.entries(emojiCategories).map(([category, emojis]) => (
+                              <div key={category}>
+                                <h4 className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">{category}</h4>
+                                <div className="flex flex-wrap gap-1">
+                                  {emojis.map((emoji) => (
+                                    <button
+                                      key={emoji}
+                                      onClick={() => insertEmoji(emoji)}
+                                      className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors text-lg"
+                                      title={emoji}
+                                    >
+                                      {emoji}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <button
+                            onClick={() => setShowEmojiPicker(false)}
+                            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      )}
+                    </div>
                     <textarea
                       value={generatedPost.content}
                       onChange={(e) => setGeneratedPost({ ...generatedPost, content: e.target.value })}
