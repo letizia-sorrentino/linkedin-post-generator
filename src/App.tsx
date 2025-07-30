@@ -1,5 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Copy, ExternalLink, Loader2, CheckCircle, AlertCircle, History, BarChart3 } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  Copy,
+  ExternalLink,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  History,
+  BarChart3,
+} from "lucide-react";
 
 interface GeneratedPost {
   content: string;
@@ -12,11 +20,13 @@ interface RecentUrl {
 }
 
 function App() {
-  const [url, setUrl] = useState('');
-  const [generatedPost, setGeneratedPost] = useState<GeneratedPost | null>(null);
+  const [url, setUrl] = useState("");
+  const [generatedPost, setGeneratedPost] = useState<GeneratedPost | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [notification, setNotification] = useState('');
+  const [error, setError] = useState("");
+  const [notification, setNotification] = useState("");
   const [recentUrls, setRecentUrls] = useState<RecentUrl[]>([]);
   const [postsGeneratedToday, setPostsGeneratedToday] = useState(0);
 
@@ -31,106 +41,128 @@ function App() {
     }
   };
 
-  const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+  const showNotification = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
     setNotification(message);
-    setTimeout(() => setNotification(''), 3000);
+    setTimeout(() => setNotification(""), 3000);
   };
 
   const addToRecentUrls = (newUrl: string) => {
     const newRecentUrl: RecentUrl = { url: newUrl, timestamp: new Date() };
-    setRecentUrls(prev => [newRecentUrl, ...prev.slice(0, 4)]);
+    setRecentUrls((prev) => [newRecentUrl, ...prev.slice(0, 4)]);
   };
 
   const generatePost = async () => {
     if (!url.trim()) {
-      setError('Please enter a valid URL');
+      setError("Please enter a valid URL");
       return;
     }
 
     if (!isValidUrl(url)) {
-      setError('Please enter a valid URL format');
+      setError("Please enter a valid URL format");
       return;
     }
 
     // Check if environment variables are configured
-    if (!import.meta.env.VITE_LANGFLOW_URL || !import.meta.env.VITE_LANGFLOW_TOKEN) {
-      setError('LangFlow API is not configured. Please check your environment variables.');
+    if (
+      !import.meta.env.VITE_LANGFLOW_URL ||
+      !import.meta.env.VITE_LANGFLOW_TOKEN
+    ) {
+      setError(
+        "LangFlow API is not configured. Please check your environment variables."
+      );
       return;
     }
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       const payload = {
-        "input_value": url,
-        "output_type": "chat",
-        "input_type": "chat",
-        "session_id": "user_1"
+        input_value: url,
+        output_type: "chat",
+        input_type: "chat",
+        session_id: "user_1",
       };
 
       const options = {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`,
-          'Accept': 'application/json'
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`,
+          Accept: "application/json",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       };
 
-      const response = await fetch('/api/langflow/lf/54425f0a-4d1c-4195-9f8a-fe76ce2c72cf/api/v1/run/b8366bbf-3b78-46a1-b603-c6c30863a697', options);
-      
+      const response = await fetch(
+        "/api/langflow/lf/54425f0a-4d1c-4195-9f8a-fe76ce2c72cf/api/v1/run/b8366bbf-3b78-46a1-b603-c6c30863a697",
+        options
+      );
+
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`API request failed (${response.status}): ${errorText || response.statusText}`);
+        throw new Error(
+          `API request failed (${response.status}): ${
+            errorText || response.statusText
+          }`
+        );
       }
 
       const data = await response.json();
-      
+
       // Extract the generated content from LangFlow response
-      let generatedContent = '';
-      
+      let generatedContent = "";
+
       if (data.outputs && data.outputs.length > 0) {
         // Try different possible response structures
         const output = data.outputs[0];
-        generatedContent = output.outputs?.[0]?.results?.message?.text ||
-                          output.outputs?.[0]?.results?.text ||
-                          output.outputs?.[0]?.message?.text ||
-                          output.outputs?.[0]?.text ||
-                          output.message?.text ||
-                          output.text ||
-                          '';
+        generatedContent =
+          output.outputs?.[0]?.results?.message?.text ||
+          output.outputs?.[0]?.results?.text ||
+          output.outputs?.[0]?.message?.text ||
+          output.outputs?.[0]?.text ||
+          output.message?.text ||
+          output.text ||
+          "";
       } else if (data.message) {
-        generatedContent = typeof data.message === 'string' ? data.message : data.message.text || '';
+        generatedContent =
+          typeof data.message === "string"
+            ? data.message
+            : data.message.text || "";
       } else if (data.text) {
         generatedContent = data.text;
       }
-      
+
       if (!generatedContent) {
-        console.error('Unexpected response structure:', data);
-        throw new Error('No content generated. Please check the LangFlow response format.');
+        console.error("Unexpected response structure:", data);
+        throw new Error(
+          "No content generated. Please check the LangFlow response format."
+        );
       }
-      
+
       const newPost: GeneratedPost = {
         content: generatedContent,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       setGeneratedPost(newPost);
       addToRecentUrls(url);
-      setPostsGeneratedToday(prev => prev + 1);
-      showNotification('LinkedIn post generated successfully!');
-      
+      setPostsGeneratedToday((prev) => prev + 1);
+      showNotification("LinkedIn post generated successfully!");
     } catch (err) {
-      console.error('API Error:', err);
-      
-      if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
-        setError('Connection failed: This may be due to CORS restrictions or network issues. Try using a CORS browser extension or check if the API endpoint is accessible.');
+      console.error("API Error:", err);
+
+      if (err instanceof TypeError && err.message.includes("Failed to fetch")) {
+        setError(
+          "Connection failed: This may be due to CORS restrictions or network issues. Try using a CORS browser extension or check if the API endpoint is accessible."
+        );
       } else if (err instanceof Error) {
         setError(`Failed to generate post: ${err.message}`);
       } else {
-        setError('An unexpected error occurred. Please try again.');
+        setError("An unexpected error occurred. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -139,80 +171,99 @@ function App() {
 
   const generateVariation = async () => {
     if (!generatedPost) return;
-    
-    if (!import.meta.env.VITE_LANGFLOW_URL || !import.meta.env.VITE_LANGFLOW_TOKEN) {
-      setError('LangFlow API is not configured. Please check your environment variables.');
+
+    if (
+      !import.meta.env.VITE_LANGFLOW_URL ||
+      !import.meta.env.VITE_LANGFLOW_TOKEN
+    ) {
+      setError(
+        "LangFlow API is not configured. Please check your environment variables."
+      );
       return;
     }
-    
+
     setIsLoading(true);
-    setError('');
-    
+    setError("");
+
     try {
       const payload = {
-        "input_value": url + " (generate a different variation)",
-        "output_type": "chat",
-        "input_type": "chat",
-        "session_id": "user_1"
+        input_value: url + " (generate a different variation)",
+        output_type: "chat",
+        input_type: "chat",
+        session_id: "user_1",
       };
 
       const options = {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`,
-          'Accept': 'application/json'
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`,
+          Accept: "application/json",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       };
 
-      const response = await fetch('/api/langflow/lf/54425f0a-4d1c-4195-9f8a-fe76ce2c72cf/api/v1/run/b8366bbf-3b78-46a1-b603-c6c30863a697', options);
-      
+      const response = await fetch(
+        "/api/langflow/lf/54425f0a-4d1c-4195-9f8a-fe76ce2c72cf/api/v1/run/b8366bbf-3b78-46a1-b603-c6c30863a697",
+        options
+      );
+
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`API request failed (${response.status}): ${errorText || response.statusText}`);
+        throw new Error(
+          `API request failed (${response.status}): ${
+            errorText || response.statusText
+          }`
+        );
       }
 
       const data = await response.json();
-      
+
       // Extract the generated content from LangFlow response
-      let generatedContent = '';
-      
+      let generatedContent = "";
+
       if (data.outputs && data.outputs.length > 0) {
         const output = data.outputs[0];
-        generatedContent = output.outputs?.[0]?.results?.message?.text ||
-                          output.outputs?.[0]?.results?.text ||
-                          output.outputs?.[0]?.message?.text ||
-                          output.outputs?.[0]?.text ||
-                          output.message?.text ||
-                          output.text ||
-                          '';
+        generatedContent =
+          output.outputs?.[0]?.results?.message?.text ||
+          output.outputs?.[0]?.results?.text ||
+          output.outputs?.[0]?.message?.text ||
+          output.outputs?.[0]?.text ||
+          output.message?.text ||
+          output.text ||
+          "";
       } else if (data.message) {
-        generatedContent = typeof data.message === 'string' ? data.message : data.message.text || '';
+        generatedContent =
+          typeof data.message === "string"
+            ? data.message
+            : data.message.text || "";
       } else if (data.text) {
         generatedContent = data.text;
       }
-      
+
       if (!generatedContent) {
-        console.error('Unexpected response structure:', data);
-        throw new Error('No content generated. Please check the LangFlow response format.');
+        console.error("Unexpected response structure:", data);
+        throw new Error(
+          "No content generated. Please check the LangFlow response format."
+        );
       }
-      
+
       setGeneratedPost({
         content: generatedContent,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
-      showNotification('New variation generated!');
-      
+      showNotification("New variation generated!");
     } catch (err) {
-      console.error('Variation API Error:', err);
-      
-      if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
-        setError('Connection failed: This may be due to CORS restrictions or network issues. Try using a CORS browser extension or check if the API endpoint is accessible.');
+      console.error("Variation API Error:", err);
+
+      if (err instanceof TypeError && err.message.includes("Failed to fetch")) {
+        setError(
+          "Connection failed: This may be due to CORS restrictions or network issues. Try using a CORS browser extension or check if the API endpoint is accessible."
+        );
       } else if (err instanceof Error) {
         setError(`Failed to generate variation: ${err.message}`);
       } else {
-        setError('An unexpected error occurred. Please try again.');
+        setError("An unexpected error occurred. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -221,12 +272,12 @@ function App() {
 
   const copyToClipboard = async () => {
     if (!generatedPost) return;
-    
+
     try {
       await navigator.clipboard.writeText(generatedPost.content);
-      showNotification('Copied to clipboard!');
+      showNotification("Copied to clipboard!");
     } catch (err) {
-      showNotification('Failed to copy to clipboard', 'error');
+      showNotification("Failed to copy to clipboard", "error");
     }
   };
 
@@ -254,7 +305,8 @@ function App() {
             Transform any article into engaging LinkedIn content
           </p>
           <p className="text-gray-500 max-w-2xl mx-auto">
-            Paste any article URL and we'll create a professional LinkedIn post that engages your network and drives meaningful conversations.
+            Paste any article URL and we'll create a professional LinkedIn post
+            that engages your network and drives meaningful conversations.
           </p>
         </div>
 
@@ -271,7 +323,10 @@ function App() {
         <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-8 mb-8">
           {/* URL Input Section */}
           <div className="mb-8">
-            <label htmlFor="url" className="block text-sm font-semibold text-gray-700 mb-3">
+            <label
+              htmlFor="url"
+              className="block text-sm font-semibold text-gray-700 mb-3"
+            >
               Article URL
             </label>
             <div className="flex gap-3">
@@ -282,7 +337,7 @@ function App() {
                   value={url}
                   onChange={(e) => {
                     setUrl(e.target.value);
-                    setError('');
+                    setError("");
                   }}
                   placeholder="Paste article URL here (HBR, TechCrunch, industry blogs, etc.)"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500"
@@ -319,7 +374,9 @@ function App() {
           {generatedPost && (
             <div className="border-t border-gray-200 pt-8">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Generated LinkedIn Post</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Generated LinkedIn Post
+                </h3>
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-gray-500">
                     {generatedPost.content.length}/{MAX_CHARS} characters
@@ -342,19 +399,26 @@ function App() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="relative">
                 <textarea
                   value={generatedPost.content}
-                  onChange={(e) => setGeneratedPost({ ...generatedPost, content: e.target.value })}
+                  onChange={(e) =>
+                    setGeneratedPost({
+                      ...generatedPost,
+                      content: e.target.value,
+                    })
+                  }
                   className="w-full h-80 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 leading-relaxed"
                   placeholder="Your generated LinkedIn post will appear here..."
                 />
-                <div className={`absolute bottom-2 right-2 text-xs px-2 py-1 rounded ${
-                  generatedPost.content.length > MAX_CHARS 
-                    ? 'bg-red-100 text-red-600' 
-                    : 'bg-gray-100 text-gray-500'
-                }`}>
+                <div
+                  className={`absolute bottom-2 right-2 text-xs px-2 py-1 rounded ${
+                    generatedPost.content.length > MAX_CHARS
+                      ? "bg-red-100 text-red-600"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
+                >
                   {generatedPost.content.length}/{MAX_CHARS}
                 </div>
               </div>
@@ -390,7 +454,9 @@ function App() {
 
         {/* Tips Section */}
         <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
-          <h3 className="font-semibold text-gray-900 mb-3">💡 Tips for Great LinkedIn Posts</h3>
+          <h3 className="font-semibold text-gray-900 mb-3">
+            💡 Tips for Great LinkedIn Posts
+          </h3>
           <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">
             <div>
               <strong>Best Article Sources:</strong>
