@@ -256,7 +256,7 @@ function App() {
     
     try {
       const payload = {
-        "input_value": url + " (generate a different variation)",
+        "input_value": `Please generate a different variation of this LinkedIn post: ${generatedPost.content}`,
         "output_type": "chat",
         "input_type": "chat",
         "session_id": "user_1"
