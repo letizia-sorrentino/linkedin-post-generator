@@ -15,7 +15,7 @@ interface PostTemplate {
   id: string;
   name: string;
   description: string;
-  style: string;
+  prompt: string;
 }
 
 const POST_TEMPLATES: PostTemplate[] = [
@@ -23,31 +23,31 @@ const POST_TEMPLATES: PostTemplate[] = [
     id: 'professional',
     name: 'Professional Insight',
     description: 'Formal, analytical tone with key takeaways',
-    style: 'professional'
+    prompt: 'Create a professional LinkedIn post that provides analytical insights and key takeaways from this article. Use a formal, business-appropriate tone.'
   },
   {
     id: 'storytelling',
     name: 'Personal Story',
     description: 'Engaging narrative with personal connection',
-    style: 'storytelling'
+    prompt: 'Create a LinkedIn post that tells a compelling story based on this article. Make it personal and relatable, connecting the content to real-world experiences.'
   },
   {
     id: 'thought-leadership',
     name: 'Thought Leadership',
     description: 'Industry expertise with forward-thinking perspective',
-    style: 'thought-leadership'
+    prompt: 'Create a thought leadership LinkedIn post that demonstrates industry expertise and provides a forward-thinking perspective on this article. Include strategic insights.'
   },
   {
     id: 'discussion',
     name: 'Discussion Starter',
     description: 'Engaging questions to spark conversation',
-    style: 'discussion'
+    prompt: 'Create a LinkedIn post that sparks discussion and engagement. Include thought-provoking questions and encourage comments from your network about this article.'
   },
   {
     id: 'casual',
     name: 'Casual & Friendly',
     description: 'Conversational tone with approachable language',
-    style: 'casual'
+    prompt: 'Create a casual, friendly LinkedIn post about this article. Use conversational language and an approachable tone that feels authentic and relatable.'
   }
 ];
 function App() {
@@ -102,9 +102,10 @@ function App() {
     setError('');
 
     try {
+      const templatePrompt = `${selectedTemplate.prompt}\n\nArticle URL: ${url}`;
+      
       const payload = {
-        "input_value": url,
-        "style": selectedTemplate.style,
+        "input_value": templatePrompt,
         "output_type": "chat",
         "input_type": "chat",
         "session_id": "user_1"
@@ -190,10 +191,10 @@ function App() {
     setError('');
     
     try {
+      const templatePrompt = `${selectedTemplate.prompt} (generate a different variation)\n\nArticle URL: ${url}`;
+      
       const payload = {
-        "input_value": url,
-        "style": selectedTemplate.style,
-        "variation": true,
+        "input_value": templatePrompt,
         "output_type": "chat",
         "input_type": "chat",
         "session_id": "user_1"
