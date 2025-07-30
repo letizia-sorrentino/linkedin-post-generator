@@ -65,14 +65,34 @@ function App() {
     setError('');
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call LangFlow API
+      const response = await fetch(`${import.meta.env.VITE_LANGFLOW_URL}?stream=false`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`
+        },
+        body: JSON.stringify({
+          input_value: url,
+          output_type: "chat",
+          input_type: "chat"
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
       
-      // Mock API response - in real implementation, this would call your LangFlow endpoint
-      const mockResponse = mockPosts[Math.floor(Math.random() * mockPosts.length)];
+      // Extract the generated content from LangFlow response
+      // You may need to adjust this based on your actual response structure
+      const generatedContent = data.outputs?.[0]?.outputs?.[0]?.results?.message?.text || 
+                              data.message || 
+                              'Generated post content here';
       
       const newPost: GeneratedPost = {
-        content: mockResponse,
+        content: generatedContent,
         timestamp: new Date()
       };
 
@@ -81,7 +101,8 @@ function App() {
       setPostsGeneratedToday(prev => prev + 1);
       showNotification('LinkedIn post generated successfully!');
     } catch (err) {
-      setError('Failed to generate post. Please try again.');
+      console.error('API Error:', err);
+      setError(`Failed to generate post: ${err instanceof Error ? err.message : 'Please try again.'}`);
     } finally {
       setIsLoading(false);
     }
@@ -92,16 +113,37 @@ function App() {
     
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const mockResponse = mockPosts[Math.floor(Math.random() * mockPosts.length)];
+      // Call LangFlow API for variation
+      const response = await fetch(`${import.meta.env.VITE_LANGFLOW_URL}?stream=false`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`
+        },
+        body: JSON.stringify({
+          input_value: url + " (generate a different variation)",
+          output_type: "chat",
+          input_type: "chat"
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const generatedContent = data.outputs?.[0]?.outputs?.[0]?.results?.message?.text || 
+                              data.message || 
+                              'Generated variation content here';
       
       setGeneratedPost({
-        content: mockResponse,
+        content: generatedContent,
         timestamp: new Date()
       });
       showNotification('New variation generated!');
     } catch (err) {
-      setError('Failed to generate variation. Please try again.');
+      console.error('Variation API Error:', err);
+      setError(`Failed to generate variation: ${err instanceof Error ? err.message : 'Please try again.'}`);
     } finally {
       setIsLoading(false);
     }
