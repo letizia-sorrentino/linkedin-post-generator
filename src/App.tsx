@@ -76,12 +76,11 @@ function App() {
           'Authorization': `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`,
           'Accept': 'application/json'
         },
-        mode: 'cors' as RequestMode,
         body: JSON.stringify(payload)
       };
 
-      const response = await fetch(import.meta.env.VITE_LANGFLOW_URL, options);
-
+      const response = await fetch('/api/langflow/lf/54425f0a-4d1c-4195-9f8a-fe76ce2c72cf/api/v1/run/b8366bbf-3b78-46a1-b603-c6c30863a697', options);
+      
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`API request failed (${response.status}): ${errorText || response.statusText}`);
@@ -164,12 +163,11 @@ function App() {
           'Authorization': `Bearer ${import.meta.env.VITE_LANGFLOW_TOKEN}`,
           'Accept': 'application/json'
         },
-        mode: 'cors' as RequestMode,
         body: JSON.stringify(payload)
       };
 
-      const response = await fetch(import.meta.env.VITE_LANGFLOW_URL, options);
-
+      const response = await fetch('/api/langflow/lf/54425f0a-4d1c-4195-9f8a-fe76ce2c72cf/api/v1/run/b8366bbf-3b78-46a1-b603-c6c30863a697', options);
+      
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`API request failed (${response.status}): ${errorText || response.statusText}`);
