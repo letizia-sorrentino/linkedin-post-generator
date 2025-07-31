@@ -43,6 +43,7 @@ function App() {
   const [showFavorites, setShowFavorites] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Event handlers
   const handleGeneratePost = useCallback(async () => {
@@ -146,7 +147,7 @@ function App() {
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-300 ${
+      className={`h-screen transition-colors duration-300 ${
         darkMode
           ? "dark bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
           : "bg-gradient-to-br from-blue-50 via-white to-indigo-50"
@@ -171,11 +172,13 @@ function App() {
           favoritesCount={favorites.length}
           onNavigate={handleNavigation}
           activeSection={activeSection}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-auto">
-          <div className="container mx-auto px-4 py-8 max-w-4xl lg:max-w-5xl">
+          <div className="container mx-auto px-4 py-8 pt-16 lg:pt-8 max-w-4xl lg:max-w-5xl">
             <Header darkMode={darkMode} onToggleTheme={() => {}} />
             
             <StatsBar
