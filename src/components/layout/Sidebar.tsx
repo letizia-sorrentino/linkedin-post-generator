@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Home, 
   FileText, 
@@ -20,7 +21,6 @@ interface SidebarProps {
   postsGeneratedToday: number;
   draftsCount: number;
   favoritesCount: number;
-  onNavigate: (section: string) => void;
   activeSection: string;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
@@ -32,11 +32,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   postsGeneratedToday,
   draftsCount,
   favoritesCount,
-  onNavigate,
   activeSection,
   isCollapsed,
   onToggleCollapse
 }) => {
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigationItems = [
@@ -83,7 +83,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const handleNavigation = (section: string) => {
-    onNavigate(section);
+    // Map section to route
+    const routeMap: { [key: string]: string } = {
+      'home': '/',
+      'drafts': '/drafts',
+      'favorites': '/favorites',
+      'history': '/history',
+      'stats': '/stats',
+      'tips': '/tips'
+    };
+    
+    const route = routeMap[section];
+    if (route) {
+      navigate(route);
+    }
     setIsMobileMenuOpen(false);
   };
 
