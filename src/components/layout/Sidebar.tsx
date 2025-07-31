@@ -1,0 +1,193 @@
+import React, { useState } from 'react';
+import { 
+  Home, 
+  FileText, 
+  Heart, 
+  History, 
+  Settings, 
+  Menu, 
+  X,
+  Sparkles,
+  BarChart3,
+  Lightbulb
+} from 'lucide-react';
+
+interface SidebarProps {
+  darkMode: boolean;
+  onToggleTheme: () => void;
+  postsGeneratedToday: number;
+  draftsCount: number;
+  favoritesCount: number;
+  onNavigate: (section: string) => void;
+  activeSection: string;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({
+  darkMode,
+  onToggleTheme,
+  postsGeneratedToday,
+  draftsCount,
+  favoritesCount,
+  onNavigate,
+  activeSection
+}) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const navigationItems = [
+    {
+      id: 'home',
+      label: 'Generator',
+      icon: Home,
+      badge: null
+    },
+    {
+      id: 'drafts',
+      label: 'Drafts',
+      icon: FileText,
+      badge: draftsCount
+    },
+    {
+      id: 'favorites',
+      label: 'Favorites',
+      icon: Heart,
+      badge: favoritesCount
+    },
+    {
+      id: 'history',
+      label: 'Recent URLs',
+      icon: History,
+      badge: null
+    },
+    {
+      id: 'stats',
+      label: 'Statistics',
+      icon: BarChart3,
+      badge: postsGeneratedToday
+    },
+    {
+      id: 'tips',
+      label: 'Tips',
+      icon: Lightbulb,
+      badge: null
+    }
+  ];
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleNavigation = (section: string) => {
+    onNavigate(section);
+    setIsMobileMenuOpen(false);
+  };
+
+  return (
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={toggleMobileMenu}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200"
+      >
+        {isMobileMenuOpen ? (
+          <X className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+        ) : (
+          <Menu className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+        )}
+      </button>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={toggleMobileMenu}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`fixed left-0 top-0 h-full z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:relative lg:z-auto`}
+      >
+        <div className="h-full w-64 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border-r border-gray-200 dark:border-gray-700 shadow-xl">
+          {/* Header */}
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-3 mb-4">
+              <Sparkles className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                LinkedIn Generator
+              </h1>
+            </div>
+            
+            {/* Theme Toggle */}
+            <button
+              onClick={onToggleTheme}
+              className="w-full flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+            >
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Theme
+              </span>
+              {darkMode ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500">Light</span>
+                  <div className="w-8 h-4 bg-blue-600 rounded-full relative">
+                    <div className="absolute right-1 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-4 bg-gray-300 rounded-full relative">
+                    <div className="absolute left-1 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+                  </div>
+                  <span className="text-xs text-gray-500">Dark</span>
+                </div>
+              )}
+            </button>
+          </div>
+
+          {/* Navigation */}
+          <nav className="p-4">
+            <ul className="space-y-2">
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeSection === item.id;
+                
+                return (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => handleNavigation(item.id)}
+                      className={`w-full flex items-center justify-between p-3 rounded-lg transition-all duration-200 ${
+                        isActive
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className="w-5 h-5" />
+                        <span className="font-medium">{item.label}</span>
+                      </div>
+                      {item.badge !== null && item.badge > 0 && (
+                        <span className="px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full">
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          {/* Footer */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="text-center">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Posts Today: {postsGeneratedToday}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}; 

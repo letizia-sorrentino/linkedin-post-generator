@@ -10,6 +10,7 @@ import { usePostsToday } from "./hooks/usePostsToday";
 import { Header } from "./components/layout/Header";
 import { StatsBar } from "./components/layout/StatsBar";
 import { MainContent } from "./components/layout/MainContent";
+import { Sidebar } from "./components/layout/Sidebar";
 import { ActionButtons } from "./components/features/ActionButtons";
 import { DraftsPanel } from "./components/features/DraftsPanel";
 import { FavoritesPanel } from "./components/features/FavoritesPanel";
@@ -41,6 +42,7 @@ function App() {
   const [showDrafts, setShowDrafts] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
 
   // Event handlers
   const handleGeneratePost = useCallback(async () => {
@@ -121,6 +123,27 @@ function App() {
     clearError();
   }, [setUrl, clearError]);
 
+  const handleNavigation = useCallback((section: string) => {
+    setActiveSection(section);
+    
+    // Handle specific section actions
+    switch (section) {
+      case 'drafts':
+        setShowDrafts(true);
+        setShowFavorites(false);
+        break;
+      case 'favorites':
+        setShowFavorites(true);
+        setShowDrafts(false);
+        break;
+      case 'home':
+      default:
+        setShowDrafts(false);
+        setShowFavorites(false);
+        break;
+    }
+  }, []);
+
   return (
     <div
       className={`min-h-screen transition-colors duration-300 ${
@@ -138,61 +161,77 @@ function App() {
         />
       ))}
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <Header darkMode={darkMode} onToggleTheme={toggleTheme} />
-        
-        <StatsBar
+      <div className="flex h-screen">
+        {/* Sidebar */}
+        <Sidebar
+          darkMode={darkMode}
+          onToggleTheme={toggleTheme}
           postsGeneratedToday={postsGeneratedToday}
           draftsCount={drafts.length}
           favoritesCount={favorites.length}
+          onNavigate={handleNavigation}
+          activeSection={activeSection}
         />
 
-        <ActionButtons
-          draftsCount={drafts.length}
-          favoritesCount={favorites.length}
-          onToggleDrafts={() => setShowDrafts(!showDrafts)}
-          onToggleFavorites={() => setShowFavorites(!showFavorites)}
-        />
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-auto">
+          <div className="container mx-auto px-4 py-8 max-w-4xl lg:max-w-5xl">
+            <Header darkMode={darkMode} onToggleTheme={() => {}} />
+            
+            <StatsBar
+              postsGeneratedToday={postsGeneratedToday}
+              draftsCount={drafts.length}
+              favoritesCount={favorites.length}
+            />
 
-        <MainContent
-          url={url}
-          onUrlChange={setUrl}
-          onGenerate={handleGeneratePost}
-          isLoading={isLoading}
-          error={error}
-          generatedPost={generatedPost}
-          onContentChange={updatePostContent}
-          onCopy={handleCopyToClipboard}
-          onSaveDraft={handleSaveDraft}
-          onAddToFavorites={handleAddToFavorites}
-          onExport={handleExportPost}
-          onGenerateVariation={handleGenerateVariation}
-          onTogglePreview={() => setShowPreview(!showPreview)}
-          showPreview={showPreview}
-        />
+            <ActionButtons
+              draftsCount={drafts.length}
+              favoritesCount={favorites.length}
+              onToggleDrafts={() => setShowDrafts(!showDrafts)}
+              onToggleFavorites={() => setShowFavorites(!showFavorites)}
+            />
 
-        <DraftsPanel
-          drafts={drafts}
-          showDrafts={showDrafts}
-          onToggleDrafts={() => setShowDrafts(false)}
-          onLoadDraft={handleLoadDraft}
-          onDeleteDraft={deleteDraft}
-        />
+            <MainContent
+              url={url}
+              onUrlChange={setUrl}
+              onGenerate={handleGeneratePost}
+              isLoading={isLoading}
+              error={error}
+              generatedPost={generatedPost}
+              onContentChange={updatePostContent}
+              onCopy={handleCopyToClipboard}
+              onSaveDraft={handleSaveDraft}
+              onAddToFavorites={handleAddToFavorites}
+              onExport={handleExportPost}
+              onGenerateVariation={handleGenerateVariation}
+              onTogglePreview={() => setShowPreview(!showPreview)}
+              showPreview={showPreview}
+            />
 
-        <FavoritesPanel
-          favorites={favorites}
-          showFavorites={showFavorites}
-          onToggleFavorites={() => setShowFavorites(false)}
-          onLoadFavorite={handleLoadFavorite}
-          onDeleteFavorite={deleteFavorite}
-        />
+            <DraftsPanel
+              drafts={drafts}
+              showDrafts={showDrafts}
+              onToggleDrafts={() => setShowDrafts(false)}
+              onLoadDraft={handleLoadDraft}
+              onDeleteDraft={deleteDraft}
+            />
 
-        <RecentUrls
-          recentUrls={recentUrls}
-          onUrlSelect={handleUrlSelect}
-        />
+            <FavoritesPanel
+              favorites={favorites}
+              showFavorites={showFavorites}
+              onToggleFavorites={() => setShowFavorites(false)}
+              onLoadFavorite={handleLoadFavorite}
+              onDeleteFavorite={deleteFavorite}
+            />
 
-        <TipsSection />
+            <RecentUrls
+              recentUrls={recentUrls}
+              onUrlSelect={handleUrlSelect}
+            />
+
+            <TipsSection />
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Copy, Save, Star, Download, Eye, Smile } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Copy, Save, Star, Download, Eye, Smile, MoreHorizontal } from 'lucide-react';
 import { GeneratedPost } from '../../types';
 import { MAX_CHARS, EMOJI_CATEGORIES } from '../../constants';
 import { getCharacterCountColor, getCharacterCountBg } from '../../utils';
@@ -28,6 +28,26 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   showPreview,
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showMoreActions, setShowMoreActions] = useState(false);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+  const moreActionsRef = useRef<HTMLDivElement>(null);
+
+  // Click outside handlers
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+      if (moreActionsRef.current && !moreActionsRef.current.contains(event.target as Node)) {
+        setShowMoreActions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   if (!generatedPost) return null;
 
@@ -54,67 +74,107 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   };
 
   return (
-    <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Generated LinkedIn Post
-        </h3>
-        <div className="flex items-center gap-4">
+    <div className="space-y-6">
+      {/* Header with title and character count */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Generated LinkedIn Post
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Edit and customize your post content
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
           <span
-            className={`text-sm px-2 py-1 rounded ${getCharacterCountBg(
+            className={`text-sm px-3 py-1 rounded-full font-medium ${getCharacterCountBg(
               generatedPost.content.length
             )} ${getCharacterCountColor(generatedPost.content.length)}`}
           >
-            {generatedPost.content.length}/{MAX_CHARS} characters
+            {generatedPost.content.length}/{MAX_CHARS}
           </span>
-          <div className="flex gap-2">
-            <button
-              onClick={onTogglePreview}
-              className="px-4 py-2 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium"
-            >
-              <Eye className="w-4 h-4" />
-              {showPreview ? "Hide Preview" : "Preview"}
-            </button>
-            <button
-              onClick={onGenerateVariation}
-              className="px-4 py-2 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-all duration-200 text-sm font-medium"
-            >
-              Generate Another Version
-            </button>
-            <button
-              onClick={onSaveDraft}
-              className="px-4 py-2 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-700 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium"
-            >
-              <Save className="w-4 h-4" />
-              Save Draft
-            </button>
-            <button
-              onClick={onAddToFavorites}
-              className="px-4 py-2 text-yellow-600 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-900 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium"
-            >
-              <Star className="w-4 h-4" />
-              Favorite
-            </button>
-            <button
-              onClick={onExport}
-              className="px-4 py-2 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium"
-            >
-              <Download className="w-4 h-4" />
-              Export
-            </button>
-            <button
-              onClick={onCopy}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium shadow-md hover:shadow-lg"
-            >
-              <Copy className="w-4 h-4" />
-              Copy
-            </button>
-          </div>
         </div>
       </div>
 
+      {/* Action Buttons - Responsive design */}
+      <div className="flex flex-wrap gap-2">
+        {/* Primary Actions */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={onCopy}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium shadow-md hover:shadow-lg"
+          >
+            <Copy className="w-4 h-4" />
+            Copy
+          </button>
+          <button
+            onClick={onExport}
+            className="px-4 py-2 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium"
+          >
+            <Download className="w-4 h-4" />
+            Export
+          </button>
+        </div>
+
+        {/* Secondary Actions */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={onTogglePreview}
+            className="px-4 py-2 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium"
+          >
+            <Eye className="w-4 h-4" />
+            {showPreview ? "Hide Preview" : "Preview"}
+          </button>
+          <button
+            onClick={onGenerateVariation}
+            className="px-4 py-2 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-all duration-200 text-sm font-medium"
+          >
+            Generate Variation
+          </button>
+        </div>
+
+        {/* More Actions Dropdown */}
+        <div className="relative" ref={moreActionsRef}>
+          <button
+            onClick={() => setShowMoreActions(!showMoreActions)}
+            className="px-4 py-2 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium"
+          >
+            <MoreHorizontal className="w-4 h-4" />
+            More
+          </button>
+          {showMoreActions && (
+            <div className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-10">
+              <div className="py-2">
+                <button
+                  onClick={() => {
+                    onSaveDraft();
+                    setShowMoreActions(false);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900 flex items-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  Save Draft
+                </button>
+                <button
+                  onClick={() => {
+                    onAddToFavorites();
+                    setShowMoreActions(false);
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900 flex items-center gap-2"
+                >
+                  <Star className="w-4 h-4" />
+                  Add to Favorites
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Text Editor */}
       <div className="relative">
-        <div className="flex items-center gap-2 mb-2">
+        {/* Emoji Picker */}
+        <div className="flex items-center gap-2 mb-3" ref={emojiPickerRef}>
           <button
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
             className="flex items-center gap-1 px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
@@ -123,7 +183,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
             Emojis
           </button>
           {showEmojiPicker && (
-            <div className="absolute top-8 left-0 z-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg p-4 w-80">
+            <div className="absolute top-8 left-0 z-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg p-4 w-80 max-h-64 overflow-y-auto">
               <div className="space-y-3">
                 {Object.entries(EMOJI_CATEGORIES).map(
                   ([category, emojis]) => (
@@ -156,14 +216,18 @@ export const PostEditor: React.FC<PostEditorProps> = ({
             </div>
           )}
         </div>
+
+        {/* Textarea */}
         <textarea
           value={generatedPost.content}
           onChange={(e) => onContentChange(e.target.value)}
           className="w-full h-80 p-4 border border-gray-300 dark:border-gray-600 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 dark:text-white leading-relaxed bg-white dark:bg-gray-700"
           placeholder="Your generated LinkedIn post will appear here..."
         />
+        
+        {/* Character count indicator */}
         <div
-          className={`absolute bottom-2 right-2 text-xs px-2 py-1 rounded ${getCharacterCountBg(
+          className={`absolute bottom-3 right-3 text-xs px-2 py-1 rounded-full ${getCharacterCountBg(
             generatedPost.content.length
           )} ${getCharacterCountColor(
             generatedPost.content.length

@@ -2,6 +2,7 @@
 export { Header } from './layout/Header';
 export { StatsBar } from './layout/StatsBar';
 export { MainContent } from './layout/MainContent';
+export { Sidebar } from './layout/Sidebar';
 
 // Feature components
 export { UrlInput } from './features/UrlInput';
