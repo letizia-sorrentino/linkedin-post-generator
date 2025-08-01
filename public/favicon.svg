@@ -1,17 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <!-- Background circle -->
-  <circle cx="16" cy="16" r="15" fill="#0077b5"/>
+  <!-- Background gradient circle -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle with gradient -->
+  <circle cx="16" cy="16" r="15" fill="url(#bgGradient)"/>
   
   <!-- Document/Post icon -->
-  <rect x="8" y="6" width="16" height="20" rx="2" fill="white" opacity="0.9"/>
+  <rect x="8" y="6" width="16" height="20" rx="2" fill="white" opacity="0.95"/>
+  
+  <!-- Lightning bolt for "Swift" -->
+  <path d="M14 8 L18 12 L16 14 L20 18 L16 20 L14 16 L12 18 L14 8" fill="#F59E0B" stroke="#F59E0B" stroke-width="0.5"/>
   
   <!-- Text lines representing post content -->
-  <rect x="10" y="10" width="12" height="1.5" fill="#0077b5" rx="0.5"/>
-  <rect x="10" y="12.5" width="10" height="1.5" fill="#0077b5" rx="0.5"/>
-  <rect x="10" y="15" width="8" height="1.5" fill="#0077b5" rx="0.5"/>
-  <rect x="10" y="17.5" width="6" height="1.5" fill="#0077b5" rx="0.5"/>
+  <rect x="10" y="10" width="12" height="1" fill="#3B82F6" rx="0.5"/>
+  <rect x="10" y="12" width="10" height="1" fill="#3B82F6" rx="0.5"/>
+  <rect x="10" y="14" width="8" height="1" fill="#3B82F6" rx="0.5"/>
+  <rect x="10" y="16" width="6" height="1" fill="#3B82F6" rx="0.5"/>
   
-  <!-- Small LinkedIn-style "in" symbol -->
-  <circle cx="22" cy="10" r="2" fill="white"/>
-  <path d="M21 9h2v2h-2z M22 10v2h-1v-2h1z" fill="#0077b5"/>
+  <!-- Speed lines around the document -->
+  <path d="M24 10 L26 10 L25 12 L27 12" stroke="white" stroke-width="1" opacity="0.7"/>
+  <path d="M24 14 L26 14 L25 16 L27 16" stroke="white" stroke-width="1" opacity="0.7"/>
 </svg> 

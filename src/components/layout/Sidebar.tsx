@@ -8,7 +8,7 @@ import {
   Settings, 
   Menu, 
   X,
-  Sparkles,
+  Zap,
   BarChart3,
   Lightbulb,
   ChevronLeft,
@@ -150,7 +150,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className={`border-b border-gray-200 dark:border-gray-700 ${isCollapsed ? 'p-2' : 'p-6'}`}>
             {isCollapsed ? (
               <div className="flex flex-col items-center gap-4">
-                <Sparkles className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                <Zap className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                 <button
                   onClick={onToggleCollapse}
                   className="p-2 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
@@ -163,9 +163,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <Sparkles className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                    <Zap className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                     <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-                      LinkedIn Generator
+                      PostSwift
                     </h1>
                   </div>
                   <button

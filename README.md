@@ -1,4 +1,4 @@
-# LinkedIn Post Generator
+# PostSwift
 
 A modern React application that transforms articles into engaging LinkedIn posts using AI. Built with TypeScript, Vite, and Tailwind CSS.
 
