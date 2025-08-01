@@ -12,7 +12,8 @@ import {
   BarChart3,
   Lightbulb,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  BookOpen
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -59,6 +60,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badge: favoritesCount
     },
     {
+      id: 'knowledge-base',
+      label: 'Knowledge Base',
+      icon: BookOpen,
+      badge: null
+    },
+    {
       id: 'history',
       label: 'Recent URLs',
       icon: History,
@@ -88,6 +95,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       'home': '/',
       'drafts': '/drafts',
       'favorites': '/favorites',
+      'knowledge-base': '/knowledge-base',
       'history': '/history',
       'stats': '/stats',
       'tips': '/tips'

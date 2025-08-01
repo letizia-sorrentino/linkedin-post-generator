@@ -26,6 +26,16 @@ export interface RecentUrl {
   timestamp: Date;
 }
 
+export interface KnowledgeBaseItem {
+  id: string;
+  url: string;
+  title: string;
+  description?: string;
+  category?: string;
+  timestamp: Date;
+  tags?: string[];
+}
+
 export interface EmojiCategory {
   [key: string]: string[];
 }

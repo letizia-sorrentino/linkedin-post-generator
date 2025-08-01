@@ -8,13 +8,11 @@ import { useRecentUrls } from "../hooks/useRecentUrls";
 import { usePostsToday } from "../hooks/usePostsToday";
 
 import { Header } from "../components/layout/Header";
-import { StatsBar } from "../components/layout/StatsBar";
 import { MainContent } from "../components/layout/MainContent";
 import { ActionButtons } from "../components/features/ActionButtons";
 import { DraftsPanel } from "../components/features/DraftsPanel";
 import { FavoritesPanel } from "../components/features/FavoritesPanel";
 import { RecentUrls } from "../components/features/RecentUrls";
-import { TipsSection } from "../components/features/TipsSection";
 import { Notification } from "../components/ui/Notification";
 
 interface GeneratorPageProps {
@@ -133,12 +131,6 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
       ))}
 
       <Header darkMode={darkMode} onToggleTheme={onToggleTheme} />
-      
-      <StatsBar
-        postsGeneratedToday={postsGeneratedToday}
-        draftsCount={drafts.length}
-        favoritesCount={favorites.length}
-      />
 
       <ActionButtons
         draftsCount={drafts.length}
@@ -184,8 +176,6 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
         recentUrls={recentUrls}
         onUrlSelect={handleUrlSelect}
       />
-
-      <TipsSection />
     </div>
   );
 }; 

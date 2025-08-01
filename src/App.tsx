@@ -7,10 +7,12 @@ import { useDrafts } from "./hooks/useDrafts";
 import { useFavorites } from "./hooks/useFavorites";
 
 import { Sidebar } from "./components/layout/Sidebar";
+import { Footer } from "./components/layout/Footer";
 import { Notification } from "./components/ui/Notification";
 import { GeneratorPage } from "./pages/GeneratorPage";
 import { DraftsPage } from "./pages/DraftsPage";
 import { FavoritesPage } from "./pages/FavoritesPage";
+import { KnowledgeBasePage } from "./pages/KnowledgeBasePage";
 import { HistoryPage } from "./pages/HistoryPage";
 import { StatsPage } from "./pages/StatsPage";
 import { TipsPage } from "./pages/TipsPage";
@@ -35,6 +37,8 @@ const SidebarWrapper: React.FC<{ darkMode: boolean; onToggleTheme: () => void }>
         return 'drafts';
       case '/favorites':
         return 'favorites';
+      case '/knowledge-base':
+        return 'knowledge-base';
       case '/history':
         return 'history';
       case '/stats':
@@ -89,8 +93,8 @@ function App() {
           <SidebarWrapper darkMode={darkMode} onToggleTheme={toggleTheme} />
 
           {/* Main Content Area */}
-          <div className="flex-1 overflow-auto">
-            <div className="container mx-auto px-4 py-8 pt-16 lg:pt-8 max-w-4xl lg:max-w-5xl">
+          <div className="flex-1 overflow-auto flex flex-col">
+            <div className="flex-1 container mx-auto px-4 py-8 pt-16 lg:pt-8 max-w-4xl lg:max-w-5xl">
               <Routes>
                 <Route 
                   path="/" 
@@ -103,6 +107,10 @@ function App() {
                 <Route 
                   path="/favorites" 
                   element={<FavoritesPage darkMode={darkMode} />} 
+                />
+                <Route 
+                  path="/knowledge-base" 
+                  element={<KnowledgeBasePage darkMode={darkMode} />} 
                 />
                 <Route 
                   path="/history" 
@@ -118,6 +126,7 @@ function App() {
                 />
               </Routes>
             </div>
+            <Footer darkMode={darkMode} />
           </div>
         </div>
       </div>

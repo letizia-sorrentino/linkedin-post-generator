@@ -23,6 +23,7 @@ export const LOCAL_STORAGE_KEYS = {
   RECENT_URLS: "linkedin-recent-urls",
   POSTS_TODAY: "linkedin-posts-today",
   DARK_MODE: "linkedin-dark-mode",
+  KNOWLEDGE_BASE: "linkedin-knowledge-base",
 } as const;
 
 export const API_ENDPOINTS = {

@@ -1,5 +1,5 @@
 import { LOCAL_STORAGE_KEYS } from '../constants';
-import { SavedDraft, FavoritePost, RecentUrl } from '../types';
+import { SavedDraft, FavoritePost, RecentUrl, KnowledgeBaseItem } from '../types';
 
 class StorageService {
   private serialize<T>(data: T): string {
@@ -77,6 +77,21 @@ class StorageService {
 
   setDarkMode(enabled: boolean): void {
     localStorage.setItem(LOCAL_STORAGE_KEYS.DARK_MODE, this.serialize(enabled));
+  }
+
+  // Knowledge Base
+  getKnowledgeBase(): KnowledgeBaseItem[] {
+    const data = localStorage.getItem(LOCAL_STORAGE_KEYS.KNOWLEDGE_BASE);
+    if (!data) return [];
+    
+    return this.deserialize<KnowledgeBaseItem[]>(data).map(item => ({
+      ...item,
+      timestamp: new Date(item.timestamp),
+    }));
+  }
+
+  setKnowledgeBase(items: KnowledgeBaseItem[]): void {
+    localStorage.setItem(LOCAL_STORAGE_KEYS.KNOWLEDGE_BASE, this.serialize(items));
   }
 }
 
