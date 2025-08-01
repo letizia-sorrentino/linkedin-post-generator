@@ -5,6 +5,7 @@ import { useFavorites } from "../hooks/useFavorites";
 import { useRecentUrls } from "../hooks/useRecentUrls";
 import { useNotifications } from "../hooks/useNotifications";
 import { Notification } from "../components/ui/Notification";
+import { PageHeader } from "../components/layout/PageHeader";
 import { BarChart3, TrendingUp, FileText, Heart, Link, Calendar, Target, Zap } from "lucide-react";
 
 interface StatsPageProps {
@@ -77,18 +78,12 @@ export const StatsPage: React.FC<StatsPageProps> = ({ darkMode }) => {
         />
       ))}
 
-      {/* Header */}
-      <div className="text-center">
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <BarChart3 className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
-            Statistics
-          </h1>
-        </div>
-        <p className="text-xl text-gray-700 dark:text-gray-300">
-          Your LinkedIn post generation analytics
-        </p>
-      </div>
+      <PageHeader
+        title="Statistics"
+        subtitle="Your LinkedIn post generation analytics"
+        icon={BarChart3}
+        darkMode={darkMode}
+      />
 
       {/* Stats Cards */}
       <div className="max-w-6xl mx-auto">

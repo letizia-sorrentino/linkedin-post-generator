@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FavoritePost, GeneratedPost } from '../types';
 import { storageService } from '../services/storage';
-import { truncateText, generateId } from '../utils';
+import { truncateText } from '../utils';
 
 export const useFavorites = () => {
   const [favorites, setFavorites] = useState<FavoritePost[]>([]);
@@ -20,7 +20,7 @@ export const useFavorites = () => {
   const addToFavorites = useCallback((post: GeneratedPost) => {
     const title = truncateText(post.content, 50);
     const favorite: FavoritePost = {
-      id: generateId(),
+      id: Date.now().toString(),
       content: post.content,
       timestamp: new Date(),
       url: post.url,

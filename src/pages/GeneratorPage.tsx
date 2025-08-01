@@ -9,9 +9,6 @@ import { usePostsToday } from "../hooks/usePostsToday";
 
 import { Header } from "../components/layout/Header";
 import { MainContent } from "../components/layout/MainContent";
-import { ActionButtons } from "../components/features/ActionButtons";
-import { DraftsPanel } from "../components/features/DraftsPanel";
-import { FavoritesPanel } from "../components/features/FavoritesPanel";
 import { RecentUrls } from "../components/features/RecentUrls";
 import { Notification } from "../components/ui/Notification";
 
@@ -40,8 +37,6 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
   const { postsGeneratedToday, incrementPostsToday } = usePostsToday();
 
   // UI state
-  const [showDrafts, setShowDrafts] = useState(false);
-  const [showFavorites, setShowFavorites] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
   // Event handlers
@@ -102,17 +97,7 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
     showNotification("Post exported successfully!");
   }, [generatedPost, showNotification]);
 
-  const handleLoadDraft = useCallback((draft: any) => {
-    const loadedPost = loadDraft(draft);
-    showNotification("Draft loaded!");
-    setShowDrafts(false);
-  }, [loadDraft, showNotification]);
 
-  const handleLoadFavorite = useCallback((favorite: any) => {
-    const loadedPost = loadFavorite(favorite);
-    showNotification("Favorite loaded!");
-    setShowFavorites(false);
-  }, [loadFavorite, showNotification]);
 
   const handleUrlSelect = useCallback((selectedUrl: string) => {
     setUrl(selectedUrl);
@@ -132,13 +117,6 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
 
       <Header darkMode={darkMode} onToggleTheme={onToggleTheme} />
 
-      <ActionButtons
-        draftsCount={drafts.length}
-        favoritesCount={favorites.length}
-        onToggleDrafts={() => setShowDrafts(!showDrafts)}
-        onToggleFavorites={() => setShowFavorites(!showFavorites)}
-      />
-
       <MainContent
         url={url}
         onUrlChange={setUrl}
@@ -154,22 +132,7 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
         onGenerateVariation={handleGenerateVariation}
         onTogglePreview={() => setShowPreview(!showPreview)}
         showPreview={showPreview}
-      />
-
-      <DraftsPanel
-        drafts={drafts}
-        showDrafts={showDrafts}
-        onToggleDrafts={() => setShowDrafts(false)}
-        onLoadDraft={handleLoadDraft}
-        onDeleteDraft={deleteDraft}
-      />
-
-      <FavoritesPanel
-        favorites={favorites}
-        showFavorites={showFavorites}
-        onToggleFavorites={() => setShowFavorites(false)}
-        onLoadFavorite={handleLoadFavorite}
-        onDeleteFavorite={deleteFavorite}
+        darkMode={darkMode}
       />
 
       <RecentUrls

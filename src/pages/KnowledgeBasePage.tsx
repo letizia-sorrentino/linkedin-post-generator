@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useKnowledgeBase } from "../hooks/useKnowledgeBase";
+import { useRecentUrls } from "../hooks/useRecentUrls";
 import { useNotifications } from "../hooks/useNotifications";
 import { Notification } from "../components/ui/Notification";
+import { PageHeader } from "../components/layout/PageHeader";
 import { 
   BookOpen, 
   Trash2, 
@@ -12,7 +14,10 @@ import {
   ExternalLink,
   Edit3,
   Filter,
-  X
+  X,
+  History,
+  Clock,
+  Link
 } from "lucide-react";
 import { KnowledgeBaseItem } from "../types";
 
@@ -29,12 +34,14 @@ export const KnowledgeBasePage: React.FC<KnowledgeBasePageProps> = ({ darkMode }
     searchItems, 
     getCategories 
   } = useKnowledgeBase();
+  const { recentUrls, clearRecentUrls } = useRecentUrls();
   const { notifications, showNotification, dismissNotification } = useNotifications();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [editingItem, setEditingItem] = useState<KnowledgeBaseItem | null>(null);
+  const [activeTab, setActiveTab] = useState<'knowledge' | 'recent'>('knowledge');
   const [newItem, setNewItem] = useState({
     url: "",
     title: "",
@@ -93,6 +100,11 @@ export const KnowledgeBasePage: React.FC<KnowledgeBasePageProps> = ({ darkMode }
     window.open(url, '_blank');
   };
 
+  const handleClearRecentUrls = () => {
+    clearRecentUrls();
+    showNotification("Recent URLs cleared successfully!");
+  };
+
   const handleAddTag = (tag: string, item: KnowledgeBaseItem) => {
     if (!tag.trim()) return;
     const updatedTags = [...(item.tags || []), tag.trim()];
@@ -115,57 +127,258 @@ export const KnowledgeBasePage: React.FC<KnowledgeBasePageProps> = ({ darkMode }
         />
       ))}
 
-      {/* Header */}
-      <div className="text-center">
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <BookOpen className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-            Knowledge Base
-          </h1>
-        </div>
-        <p className="text-xl text-gray-700 dark:text-gray-300">
-          Store and organize links for generating LinkedIn posts
-        </p>
-      </div>
+      <PageHeader
+        title="Knowledge Base"
+        subtitle="Manage your saved links and view recent URLs"
+        icon={BookOpen}
+        darkMode={darkMode}
+      />
 
-      {/* Search and Filter Bar */}
-      <div className="max-w-4xl mx-auto space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search links..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          
-          <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="pl-10 pr-8 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">All Categories</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
-
+      {/* Tab Navigation */}
+      <div className="max-w-4xl mx-auto">
+        <div className="flex border-b border-gray-200 dark:border-gray-700 mb-6">
           <button
-            onClick={() => setIsAddingItem(true)}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+            onClick={() => setActiveTab('knowledge')}
+            className={`px-6 py-3 font-medium transition-colors duration-200 ${
+              activeTab === 'knowledge'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
           >
-            <Plus className="w-5 h-5" />
-            Add Link
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Knowledge Base ({items.length})
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('recent')}
+            className={`px-6 py-3 font-medium transition-colors duration-200 ${
+              activeTab === 'recent'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <History className="w-4 h-4" />
+              Recent URLs ({recentUrls.length})
+            </div>
           </button>
         </div>
+
+        {/* Knowledge Base Tab */}
+        {activeTab === 'knowledge' && (
+          <div className="space-y-6">
+            {/* Search and Filter Bar */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search links..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div className="relative">
+                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="pl-10 pr-8 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">All Categories</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                onClick={() => setIsAddingItem(true)}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                Add Link
+              </button>
+            </div>
+
+            {/* Knowledge Base Items */}
+            {filteredItems.length === 0 ? (
+              <div className="text-center py-12">
+                <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                  {searchQuery || selectedCategory ? "No matching links" : "No links yet"}
+                </h3>
+                <p className="text-gray-500 dark:text-gray-500">
+                  {searchQuery || selectedCategory 
+                    ? "Try adjusting your search or filter criteria."
+                    : "Add some links to your knowledge base to get started."
+                  }
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-6">
+                {filteredItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl transition-shadow duration-200"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                          <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                            {item.title}
+                          </h3>
+                          {item.category && (
+                            <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">
+                              {item.category}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 break-all">
+                          {item.url}
+                        </p>
+                        
+                        {item.description && (
+                          <p className="text-gray-700 dark:text-gray-300 text-sm mb-3">
+                            {item.description}
+                          </p>
+                        )}
+
+                        {item.tags && item.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {item.tags.map((tag, index) => (
+                              <span
+                                key={index}
+                                className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full"
+                              >
+                                <Tag className="w-3 h-3" />
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          Added: {item.timestamp.toLocaleString()}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 ml-4">
+                        <button
+                          onClick={() => handleOpenUrl(item.url)}
+                          className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
+                          title="Open link"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </button>
+                        
+                        <button
+                          onClick={() => handleCopyUrl(item.url)}
+                          className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
+                          title="Copy URL"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+                        
+                        <button
+                          onClick={() => setEditingItem(item)}
+                          className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
+                          title="Edit"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        
+                        <button
+                          onClick={() => handleDeleteItem(item)}
+                          className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Recent URLs Tab */}
+        {activeTab === 'recent' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Recent Articles ({recentUrls.length})
+              </h3>
+              <button
+                onClick={handleClearRecentUrls}
+                className="px-3 py-1 text-sm bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors duration-200"
+              >
+                Clear History
+              </button>
+            </div>
+
+            {recentUrls.length === 0 ? (
+              <div className="text-center py-12">
+                <History className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                  No recent URLs
+                </h3>
+                <p className="text-gray-500 dark:text-gray-500">
+                  Generate some posts to see your URL history here.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {recentUrls.map((url, index) => (
+                  <div
+                    key={index}
+                    className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl transition-shadow duration-200"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Link className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                            <Clock className="w-4 h-4" />
+                            <span>Used {index + 1} time{index === 0 ? '' : 's'}</span>
+                          </div>
+                        </div>
+                        <p className="text-gray-700 dark:text-gray-300 break-all">
+                          {url}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+                        <button
+                          onClick={() => handleCopyUrl(url)}
+                          className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                          title="Copy URL"
+                        >
+                          <Copy className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                        </button>
+                        <button
+                          onClick={() => handleOpenUrl(url)}
+                          className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors duration-200"
+                          title="Open URL"
+                        >
+                          <ExternalLink className="w-4 h-4 text-green-600 dark:text-green-400" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Add New Item Modal */}
@@ -354,111 +567,6 @@ export const KnowledgeBasePage: React.FC<KnowledgeBasePageProps> = ({ darkMode }
           </div>
         </div>
       )}
-
-      {/* Links List */}
-      <div className="max-w-4xl mx-auto">
-        {filteredItems.length === 0 ? (
-          <div className="text-center py-12">
-            <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
-              {searchQuery || selectedCategory ? "No matching links" : "No links yet"}
-            </h3>
-            <p className="text-gray-500 dark:text-gray-500">
-              {searchQuery || selectedCategory 
-                ? "Try adjusting your search or filter criteria."
-                : "Add some links to your knowledge base to get started."
-              }
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-6">
-            {filteredItems.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 hover:shadow-xl transition-shadow duration-200"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                        {item.title}
-                      </h3>
-                      {item.category && (
-                        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">
-                          {item.category}
-                        </span>
-                      )}
-                    </div>
-                    
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 break-all">
-                      {item.url}
-                    </p>
-                    
-                    {item.description && (
-                      <p className="text-gray-700 dark:text-gray-300 text-sm mb-3">
-                        {item.description}
-                      </p>
-                    )}
-
-                    {item.tags && item.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {item.tags.map((tag, index) => (
-                          <span
-                            key={index}
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full"
-                          >
-                            <Tag className="w-3 h-3" />
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      Added: {item.timestamp.toLocaleString()}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 ml-4">
-                    <button
-                      onClick={() => handleOpenUrl(item.url)}
-                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
-                      title="Open link"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </button>
-                    
-                    <button
-                      onClick={() => handleCopyUrl(item.url)}
-                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
-                      title="Copy URL"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </button>
-                    
-                    <button
-                      onClick={() => setEditingItem(item)}
-                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
-                      title="Edit"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </button>
-                    
-                    <button
-                      onClick={() => handleDeleteItem(item)}
-                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 }; 

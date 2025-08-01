@@ -10,10 +10,8 @@ import { Sidebar } from "./components/layout/Sidebar";
 import { Footer } from "./components/layout/Footer";
 import { Notification } from "./components/ui/Notification";
 import { GeneratorPage } from "./pages/GeneratorPage";
-import { DraftsPage } from "./pages/DraftsPage";
-import { FavoritesPage } from "./pages/FavoritesPage";
+import { ContentPage } from "./pages/ContentPage";
 import { KnowledgeBasePage } from "./pages/KnowledgeBasePage";
-import { HistoryPage } from "./pages/HistoryPage";
 import { StatsPage } from "./pages/StatsPage";
 import { TipsPage } from "./pages/TipsPage";
 
@@ -33,14 +31,10 @@ const SidebarWrapper: React.FC<{ darkMode: boolean; onToggleTheme: () => void }>
     switch (location.pathname) {
       case '/':
         return 'home';
-      case '/drafts':
-        return 'drafts';
-      case '/favorites':
-        return 'favorites';
+      case '/content':
+        return 'content';
       case '/knowledge-base':
         return 'knowledge-base';
-      case '/history':
-        return 'history';
       case '/stats':
         return 'stats';
       case '/tips':
@@ -101,20 +95,12 @@ function App() {
                   element={<GeneratorPage darkMode={darkMode} onToggleTheme={toggleTheme} />} 
                 />
                 <Route 
-                  path="/drafts" 
-                  element={<DraftsPage darkMode={darkMode} />} 
-                />
-                <Route 
-                  path="/favorites" 
-                  element={<FavoritesPage darkMode={darkMode} />} 
+                  path="/content" 
+                  element={<ContentPage darkMode={darkMode} />} 
                 />
                 <Route 
                   path="/knowledge-base" 
                   element={<KnowledgeBasePage darkMode={darkMode} />} 
-                />
-                <Route 
-                  path="/history" 
-                  element={<HistoryPage darkMode={darkMode} />} 
                 />
                 <Route 
                   path="/stats" 

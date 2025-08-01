@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import { GeneratedPost } from '../types';
 import { apiService } from '../services/api';
 import { isValidUrl } from '../utils';
-import { generateId } from '../utils';
 
 export const usePostGeneration = () => {
   const [url, setUrl] = useState("");
@@ -41,7 +40,7 @@ export const usePostGeneration = () => {
       const newPost: GeneratedPost = {
         content: generatedContent,
         timestamp: new Date(),
-        id: generateId(),
+        id: Date.now().toString(),
         url: url,
       };
 
@@ -87,7 +86,7 @@ export const usePostGeneration = () => {
       const newPost: GeneratedPost = {
         content: generatedContent,
         timestamp: new Date(),
-        id: generateId(),
+        id: Date.now().toString(),
         url: url,
       };
 

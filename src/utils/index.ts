@@ -49,8 +49,4 @@ export const getCharacterCountBg = (length: number): string => {
 
 export const truncateText = (text: string, maxLength: number = 50): string => {
   return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
-};
-
-export const generateId = (): string => {
-  return Date.now().toString();
 }; 

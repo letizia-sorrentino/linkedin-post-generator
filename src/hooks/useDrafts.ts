@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SavedDraft, GeneratedPost } from '../types';
 import { storageService } from '../services/storage';
-import { truncateText, generateId } from '../utils';
+import { truncateText } from '../utils';
 
 export const useDrafts = () => {
   const [drafts, setDrafts] = useState<SavedDraft[]>([]);
@@ -20,7 +20,7 @@ export const useDrafts = () => {
   const saveDraft = useCallback((post: GeneratedPost) => {
     const title = truncateText(post.content, 50);
     const draft: SavedDraft = {
-      id: generateId(),
+      id: Date.now().toString(),
       content: post.content,
       timestamp: new Date(),
       url: post.url,

@@ -1,6 +1,7 @@
 import React from "react";
 import { useNotifications } from "../hooks/useNotifications";
 import { Notification } from "../components/ui/Notification";
+import { PageHeader } from "../components/layout/PageHeader";
 import { Lightbulb, CheckCircle, AlertCircle, TrendingUp, Users, MessageCircle, Hash, Eye } from "lucide-react";
 
 interface TipsPageProps {
@@ -102,18 +103,12 @@ export const TipsPage: React.FC<TipsPageProps> = ({ darkMode }) => {
         />
       ))}
 
-      {/* Header */}
-      <div className="text-center">
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <Lightbulb className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 dark:from-yellow-400 dark:to-orange-400 bg-clip-text text-transparent">
-            Tips & Best Practices
-          </h1>
-        </div>
-        <p className="text-xl text-gray-700 dark:text-gray-300">
-          Expert advice for creating engaging LinkedIn posts
-        </p>
-      </div>
+      <PageHeader
+        title="Tips & Best Practices"
+        subtitle="Expert advice for creating engaging LinkedIn posts"
+        icon={Lightbulb}
+        darkMode={darkMode}
+      />
 
       {/* Tips Grid */}
       <div className="max-w-6xl mx-auto">

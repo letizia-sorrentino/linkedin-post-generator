@@ -13,7 +13,12 @@ import {
   Lightbulb,
   ChevronLeft,
   ChevronRight,
-  BookOpen
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  FolderOpen,
+  TrendingUp,
+  HelpCircle
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -25,6 +30,21 @@ interface SidebarProps {
   activeSection: string;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+}
+
+interface NavigationGroup {
+  id: string;
+  label: string;
+  icon: React.ComponentType<any>;
+  items: NavigationItem[];
+  isExpanded?: boolean;
+}
+
+interface NavigationItem {
+  id: string;
+  label: string;
+  icon: React.ComponentType<any>;
+  badge: number | null;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -39,6 +59,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(['primary', 'content']);
 
   const navigationItems = [
     {
@@ -48,38 +69,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badge: null
     },
     {
-      id: 'drafts',
-      label: 'Drafts',
-      icon: FileText,
-      badge: draftsCount
-    },
-    {
-      id: 'favorites',
-      label: 'Favorites',
-      icon: Heart,
-      badge: favoritesCount
-    },
-    {
       id: 'knowledge-base',
       label: 'Knowledge Base',
       icon: BookOpen,
       badge: null
     },
     {
-      id: 'history',
-      label: 'Recent URLs',
-      icon: History,
-      badge: null
+      id: 'content',
+      label: 'My Posts',
+      icon: FolderOpen,
+      badge: draftsCount + favoritesCount
     },
     {
       id: 'stats',
-      label: 'Statistics',
+      label: 'Analytics',
       icon: BarChart3,
       badge: postsGeneratedToday
     },
     {
       id: 'tips',
-      label: 'Tips',
+      label: 'Tips & Strategies',
       icon: Lightbulb,
       badge: null
     }
@@ -93,10 +102,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     // Map section to route
     const routeMap: { [key: string]: string } = {
       'home': '/',
-      'drafts': '/drafts',
-      'favorites': '/favorites',
+      'content': '/content',
       'knowledge-base': '/knowledge-base',
-      'history': '/history',
       'stats': '/stats',
       'tips': '/tips'
     };
