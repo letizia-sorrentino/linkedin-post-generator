@@ -25,14 +25,14 @@ This project follows a modern, modular React architecture:
 src/
 ├── components/           # Reusable UI components
 │   ├── ui/             # Basic UI components (Notification)
-│   ├── layout/         # Layout components (Header, StatsBar, MainContent)
+│   ├── layout/         # Layout components (Header, Sidebar, Footer, MainContent)
 │   └── features/       # Feature-specific components (UrlInput, PostEditor, etc.)
 ├── hooks/              # Custom React hooks for state management
 ├── services/           # API and storage services
 ├── types/              # TypeScript type definitions
 ├── utils/              # Utility functions
 ├── constants/          # App constants and configuration
-└── styles/             # Global styles
+└── pages/              # Route-based page components
 ```
 
 ### Key Architectural Decisions
@@ -126,19 +126,20 @@ src/
 
 #### Layout Components
 - `Header.tsx` - App header with title and theme toggle
-- `StatsBar.tsx` - Statistics display (posts today, drafts, favorites)
+- `Sidebar.tsx` - Navigation with statistics and theme toggle
+- `Footer.tsx` - App footer
 - `MainContent.tsx` - Main content area with card layout
+- `PageHeader.tsx` - Page headers with breadcrumbs
+- `Breadcrumb.tsx` - Breadcrumb navigation component
 
 #### Feature Components
 - `UrlInput.tsx` - URL input with validation and error handling
 - `PostEditor.tsx` - Post editing interface with emoji picker
 - `PostPreview.tsx` - LinkedIn-style post preview
 - `WordCloud.tsx` - Key terms visualization
-- `ActionButtons.tsx` - Drafts and favorites toggle buttons
 - `DraftsPanel.tsx` - Drafts management interface
 - `FavoritesPanel.tsx` - Favorites management interface
 - `RecentUrls.tsx` - URL history display
-- `TipsSection.tsx` - Usage tips and guidance
 
 #### UI Components
 - `Notification.tsx` - Toast notification system
@@ -157,6 +158,14 @@ src/
 
 - `api.ts` - LangFlow API integration with error handling
 - `storage.ts` - localStorage operations with type safety
+
+### Pages
+
+- `GeneratorPage.tsx` - Main post generation interface
+- `ContentPage.tsx` - Drafts and favorites management
+- `KnowledgeBasePage.tsx` - Knowledge base management
+- `StatsPage.tsx` - Statistics and analytics
+- `TipsPage.tsx` - Usage tips and guidance
 
 ### Types
 

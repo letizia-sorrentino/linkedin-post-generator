@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { useTheme } from "./hooks/useTheme";
 import { useNotifications } from "./hooks/useNotifications";

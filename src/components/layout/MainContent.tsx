@@ -20,7 +20,6 @@ interface MainContentProps {
   onGenerateVariation: () => void;
   onTogglePreview: () => void;
   showPreview: boolean;
-  darkMode: boolean;
 }
 
 export const MainContent: React.FC<MainContentProps> = ({
