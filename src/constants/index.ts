@@ -8,6 +8,30 @@ export const EMOJI_CATEGORIES = {
   Nature: ["🌱", "🌳", "🌊", "⛰️", "🌈", "☀️", "🌙", "⭐", "🔆", "🌸"],
 } as const;
 
+export const PUBLICATION_MAPPING: Record<string, string> = {
+  "hbr.org": "Harvard Business Review",
+  "techcrunch.com": "TechCrunch",
+  "medium.com": "Medium",
+  "forbes.com": "Forbes",
+  "bloomberg.com": "Bloomberg",
+  "reuters.com": "Reuters",
+  "wsj.com": "The Wall Street Journal",
+  "nytimes.com": "The New York Times",
+  "washingtonpost.com": "The Washington Post",
+  "theguardian.com": "The Guardian",
+  "cnn.com": "CNN",
+  "bbc.com": "BBC",
+  "npr.org": "NPR",
+  "economist.com": "The Economist",
+  "ft.com": "Financial Times",
+  "linkedin.com": "LinkedIn",
+  "github.com": "GitHub",
+  "stackoverflow.com": "Stack Overflow",
+  "dev.to": "Dev.to",
+  "hashnode.dev": "Hashnode",
+  "substack.com": "Substack",
+} as const;
+
 export const STOP_WORDS = [
   "this", "that", "with", "have", "will", "from", "they", "been", "were", "said",
   "each", "which", "their", "time", "more", "very", "what", "know", "just", "first",

@@ -37,6 +37,9 @@ export const useDrafts = () => {
       content: draft.content,
       timestamp: draft.timestamp,
       url: draft.url,
+      includeAttribution: true, // Default to true for loaded drafts
+      attributionText: draft.url ? `Source: ${draft.url}` : undefined,
+      isTruncated: false,
     };
   }, []);
 

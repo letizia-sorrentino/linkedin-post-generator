@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Copy, Save, Star, Download, Eye, Smile, MoreHorizontal } from 'lucide-react';
+import { Copy, Save, Star, Download, Eye, Smile, MoreHorizontal, Link, ToggleLeft, ToggleRight } from 'lucide-react';
 import { GeneratedPost } from '../../types';
 import { MAX_CHARS, EMOJI_CATEGORIES } from '../../constants';
-import { getCharacterCountColor, getCharacterCountBg } from '../../utils';
+import { getCharacterCountColor, getCharacterCountBg, getAttributionStatus } from '../../utils';
 
 interface PostEditorProps {
   generatedPost: GeneratedPost | null;
@@ -14,6 +14,8 @@ interface PostEditorProps {
   onGenerateVariation: () => void;
   onTogglePreview: () => void;
   showPreview: boolean;
+  includeAttribution: boolean;
+  onToggleAttribution: () => void;
 }
 
 export const PostEditor: React.FC<PostEditorProps> = ({
@@ -26,6 +28,8 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   onGenerateVariation,
   onTogglePreview,
   showPreview,
+  includeAttribution,
+  onToggleAttribution,
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showMoreActions, setShowMoreActions] = useState(false);
@@ -50,6 +54,17 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   }, []);
 
   if (!generatedPost) return null;
+
+  // Calculate total character count including attribution
+  const getTotalCharacterCount = () => {
+    if (!includeAttribution || !generatedPost.attributionText) {
+      return generatedPost.content.length;
+    }
+    return generatedPost.content.length + generatedPost.attributionText.length + 4; // +4 for "\n\n" separator
+  };
+
+  const totalChars = getTotalCharacterCount();
+  const attributionStatus = getAttributionStatus(includeAttribution, generatedPost.isTruncated || false);
 
   const insertEmoji = (emoji: string) => {
     const textarea = document.querySelector("textarea") as HTMLTextAreaElement;
@@ -86,15 +101,58 @@ export const PostEditor: React.FC<PostEditorProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span
-            className={`text-sm px-3 py-1 rounded-full font-medium ${getCharacterCountBg(
-              generatedPost.content.length
-            )} ${getCharacterCountColor(generatedPost.content.length)}`}
-          >
-            {generatedPost.content.length}/{MAX_CHARS}
-          </span>
+          {/* Attribution Toggle */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onToggleAttribution}
+              className="flex items-center gap-2 px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+              title={includeAttribution ? "Disable source attribution" : "Enable source attribution"}
+            >
+              {includeAttribution ? (
+                <ToggleRight className="w-4 h-4 text-green-600" />
+              ) : (
+                <ToggleLeft className="w-4 h-4 text-gray-400" />
+              )}
+              <Link className="w-4 h-4" />
+              Source
+            </button>
+          </div>
+          
+          {/* Enhanced Character Count */}
+          <div className="flex flex-col items-end">
+            <span
+              className={`text-sm px-3 py-1 rounded-full font-medium ${getCharacterCountBg(
+                totalChars
+              )} ${getCharacterCountColor(totalChars)}`}
+            >
+              {totalChars.toLocaleString()}/{MAX_CHARS.toLocaleString()}
+            </span>
+            <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {attributionStatus}
+            </span>
+          </div>
         </div>
       </div>
+
+      {/* Attribution Preview */}
+      {includeAttribution && generatedPost.attributionText && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Link className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+              Source Attribution (will be added automatically)
+            </span>
+          </div>
+          <div className="text-sm text-blue-700 dark:text-blue-300 whitespace-pre-line">
+            {generatedPost.attributionText}
+          </div>
+          {generatedPost.isTruncated && (
+            <div className="mt-2 text-xs text-orange-600 dark:text-orange-400 flex items-center gap-1">
+              ⚠️ Post was automatically truncated to fit with attribution
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Action Buttons - Responsive design */}
       <div className="flex flex-wrap gap-2">
@@ -225,15 +283,22 @@ export const PostEditor: React.FC<PostEditorProps> = ({
           placeholder="Your generated LinkedIn post will appear here..."
         />
         
-        {/* Character count indicator */}
-        <div
-          className={`absolute bottom-3 right-3 text-xs px-2 py-1 rounded-full ${getCharacterCountBg(
-            generatedPost.content.length
-          )} ${getCharacterCountColor(
-            generatedPost.content.length
-          )}`}
-        >
-          {generatedPost.content.length}/{MAX_CHARS}
+        {/* Enhanced Character count indicator */}
+        <div className="absolute bottom-3 right-3 flex flex-col items-end gap-1">
+          <div
+            className={`text-xs px-2 py-1 rounded-full ${getCharacterCountBg(
+              totalChars
+            )} ${getCharacterCountColor(
+              totalChars
+            )}`}
+          >
+            {totalChars.toLocaleString()}/{MAX_CHARS.toLocaleString()}
+          </div>
+          {includeAttribution && (
+            <div className="text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded-full">
+              +{generatedPost.attributionText?.length || 0} chars
+            </div>
+          )}
         </div>
       </div>
     </div>

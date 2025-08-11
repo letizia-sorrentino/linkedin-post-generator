@@ -3,6 +3,9 @@ export interface GeneratedPost {
   timestamp: Date;
   id: string;
   url?: string;
+  includeAttribution?: boolean;
+  attributionText?: string;
+  isTruncated?: boolean;
 }
 
 export interface SavedDraft {

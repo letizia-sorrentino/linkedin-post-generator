@@ -40,9 +40,11 @@
 
 ### **Core Functionality**
 - **AI-Powered Content Generation** - Transform any article URL into professional LinkedIn posts
+- **Source Attribution** - Automatically add proper source attribution with publication names
+- **Smart Character Management** - Intelligent truncation to fit posts within LinkedIn's 3000 character limit
 - **Post Variations** - Generate multiple versions of the same content
 - **LinkedIn Preview** - See how posts will look on LinkedIn
-- **Character Counter** - Real-time tracking (max 3,000 characters)
+- **Character Counter** - Real-time tracking with attribution (max 3,000 characters)
 - **Export Functionality** - Download posts as text files
 
 ### **Content Management**
@@ -50,12 +52,14 @@
 - **Favorites System** - Mark and store favorite posts
 - **Recent URLs** - Quick access to previously processed URLs
 - **Word Cloud Analysis** - Visual representation of key terms
+- **Publication Recognition** - Maps 20+ domains to clean publication names
 
 ### **User Experience**
 - **Emoji Picker** - Add emojis to enhance posts
 - **Dark/Light Mode** - Toggle between themes
 - **Responsive Design** - Works seamlessly on desktop and mobile
 - **Toast Notifications** - User feedback system
+- **Attribution Toggle** - Control source attribution inclusion
 
 ---
 
@@ -125,8 +129,8 @@ src/
 
 ### **Feature Components**
 - `UrlInput.tsx` - URL input with validation
-- `PostEditor.tsx` - Post editing interface with emoji picker
-- `PostPreview.tsx` - LinkedIn-style post preview
+- `PostEditor.tsx` - Post editing interface with emoji picker and attribution controls
+- `PostPreview.tsx` - LinkedIn-style post preview with attribution display
 - `WordCloud.tsx` - Key terms visualization
 - `DraftsPanel.tsx` - Drafts management interface
 - `FavoritesPanel.tsx` - Favorites management interface
@@ -137,7 +141,7 @@ src/
 #### **State Management**
 - `useTheme.ts` - Theme management with localStorage persistence
 - `useNotifications.ts` - Toast notifications with auto-dismiss
-- `usePostGeneration.ts` - Post generation with API integration
+- `usePostGeneration.ts` - Post generation with API integration and attribution logic
 - `useDrafts.ts` - Drafts management with localStorage
 - `useFavorites.ts` - Favorites management with localStorage
 - `useRecentUrls.ts` - URL history management
@@ -188,6 +192,9 @@ interface GeneratedPost {
   timestamp: Date;
   id: string;
   url?: string;
+  includeAttribution?: boolean;
+  attributionText?: string;
+  isTruncated?: boolean;
 }
 
 interface SavedDraft {
@@ -210,11 +217,13 @@ interface SavedDraft {
 - **Custom Animations**: Smooth transitions and hover effects
 
 ### **Key UI Features**
-- Character count with color-coded indicators
+- Character count with color-coded indicators and attribution status
 - Emoji picker with categorized emojis
-- Real-time preview
+- Real-time preview with attribution display
 - Toast notification system
 - Collapsible sidebar
+- Source attribution toggle and preview
+- Smart truncation warnings
 
 ### **Theme System**
 - Light and dark mode support
@@ -255,6 +264,8 @@ VITE_LANGFLOW_TOKEN=your_actual_application_token
 - Tone and style customization
 - A/B testing for post variations
 - Content optimization suggestions
+- Enhanced source attribution with publication mapping
+- Smart content truncation algorithms
 
 ### **Content Management**
 - Cloud storage integration
@@ -262,6 +273,8 @@ VITE_LANGFLOW_TOKEN=your_actual_application_token
 - Content calendar integration
 - Analytics and performance tracking
 - Content scheduling capabilities
+- Advanced attribution management
+- Publication database expansion
 
 ### **Platform Expansion**
 - Support for other social platforms (Twitter, Facebook, Instagram)
@@ -283,6 +296,8 @@ VITE_LANGFLOW_TOKEN=your_actual_application_token
 - PWA capabilities
 - Offline functionality
 - Real-time collaboration features
+- Enhanced attribution algorithms
+- Publication name extraction improvements
 
 ### **Enterprise Features**
 - Multi-user support
@@ -325,17 +340,19 @@ VITE_LANGFLOW_TOKEN=your_actual_application_token
 ## 📊 Project Statistics
 
 ### **Code Metrics**
-- **Lines of Code**: ~2,000+ lines
+- **Lines of Code**: ~2,500+ lines
 - **Components**: 15+ reusable components
 - **Custom Hooks**: 7+ state management hooks
 - **TypeScript Coverage**: 100%
 - **Responsive Design**: Mobile-first approach
+- **Attribution Features**: 5+ new attribution-related functions
 
 ### **Features Count**
-- **Core Features**: 10+ main features
+- **Core Features**: 12+ main features
 - **UI Components**: 20+ components
-- **Utility Functions**: 15+ utility functions
+- **Utility Functions**: 20+ utility functions
 - **API Endpoints**: 2+ API integrations
+- **Attribution Features**: 6+ attribution-related features
 
 ---
 

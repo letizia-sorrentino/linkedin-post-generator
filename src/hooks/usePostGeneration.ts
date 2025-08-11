@@ -1,13 +1,14 @@
 import { useState, useCallback } from 'react';
 import { GeneratedPost } from '../types';
 import { apiService } from '../services/api';
-import { isValidUrl } from '../utils';
+import { isValidUrl, generateAttributionText, smartTruncatePost } from '../utils';
 
 export const usePostGeneration = () => {
   const [url, setUrl] = useState("");
   const [generatedPost, setGeneratedPost] = useState<GeneratedPost | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [includeAttribution, setIncludeAttribution] = useState(true);
 
   const generatePost = useCallback(async () => {
     if (!url.trim()) {
@@ -37,11 +38,27 @@ export const usePostGeneration = () => {
     try {
       const generatedContent = await apiService.generatePost(url);
 
+      // Generate attribution text
+      const attributionText = generateAttributionText(url);
+      
+      // Apply smart truncation if attribution is enabled
+      let finalContent = generatedContent;
+      let isTruncated = false;
+      
+      if (includeAttribution) {
+        const truncationResult = smartTruncatePost(generatedContent, attributionText);
+        finalContent = truncationResult.truncatedContent;
+        isTruncated = truncationResult.isTruncated;
+      }
+
       const newPost: GeneratedPost = {
-        content: generatedContent,
+        content: finalContent,
         timestamp: new Date(),
         id: Date.now().toString(),
         url: url,
+        includeAttribution,
+        attributionText,
+        isTruncated,
       };
 
       setGeneratedPost(newPost);
@@ -62,7 +79,7 @@ export const usePostGeneration = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [url]);
+  }, [url, includeAttribution]);
 
   const generateVariation = useCallback(async () => {
     if (!generatedPost) return null;
@@ -83,11 +100,27 @@ export const usePostGeneration = () => {
     try {
       const generatedContent = await apiService.generateVariation(generatedPost.content);
 
+      // Generate attribution text
+      const attributionText = generateAttributionText(url);
+      
+      // Apply smart truncation if attribution is enabled
+      let finalContent = generatedContent;
+      let isTruncated = false;
+      
+      if (includeAttribution) {
+        const truncationResult = smartTruncatePost(generatedContent, attributionText);
+        finalContent = truncationResult.truncatedContent;
+        isTruncated = truncationResult.isTruncated;
+      }
+
       const newPost: GeneratedPost = {
-        content: generatedContent,
+        content: finalContent,
         timestamp: new Date(),
         id: Date.now().toString(),
         url: url,
+        includeAttribution,
+        attributionText,
+        isTruncated,
       };
 
       setGeneratedPost(newPost);
@@ -108,13 +141,17 @@ export const usePostGeneration = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [generatedPost, url]);
+  }, [generatedPost, url, includeAttribution]);
 
   const updatePostContent = useCallback((content: string) => {
     if (generatedPost) {
       setGeneratedPost({ ...generatedPost, content });
     }
   }, [generatedPost]);
+
+  const toggleAttribution = useCallback(() => {
+    setIncludeAttribution(prev => !prev);
+  }, []);
 
   const clearError = useCallback(() => {
     setError("");
@@ -126,9 +163,11 @@ export const usePostGeneration = () => {
     generatedPost,
     isLoading,
     error,
+    includeAttribution,
     generatePost,
     generateVariation,
     updatePostContent,
+    toggleAttribution,
     clearError,
   };
 }; 

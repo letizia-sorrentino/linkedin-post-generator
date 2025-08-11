@@ -5,6 +5,8 @@ A modern React application that transforms articles into engaging LinkedIn posts
 ## 🚀 Features
 
 - **AI-Powered Content Generation** - Transform any article URL into professional LinkedIn posts
+- **Source Attribution** - Automatically add proper source attribution with publication names
+- **Smart Character Management** - Intelligent truncation to fit posts within LinkedIn's 3000 character limit
 - **Post Variations** - Generate multiple versions of the same content
 - **Draft Management** - Save and organize your drafts with localStorage persistence
 - **Favorites System** - Mark and store your favorite posts
@@ -12,10 +14,16 @@ A modern React application that transforms articles into engaging LinkedIn posts
 - **Word Cloud Analysis** - Visual representation of key terms in your content
 - **Emoji Picker** - Add emojis to enhance your posts
 - **Dark/Light Mode** - Toggle between themes
-- **Character Counter** - Real-time character limit tracking (max 3,000 chars)
+- **Character Counter** - Real-time character limit tracking with attribution (max 3,000 chars)
 - **Export Functionality** - Download posts as text files
 - **Recent URLs** - Quick access to previously processed URLs
 - **Responsive Design** - Works seamlessly on desktop and mobile
+
+## 📚 Related Documentation
+
+- [PostSwift_Design_System.md](./PostSwift_Design_System.md) - Design guidelines and styling
+- [PostSwift_Presentation.md](./PostSwift_Presentation.md) - Project overview and architecture
+- [ATTRIBUTION_FEATURES.md](./ATTRIBUTION_FEATURES.md) - Detailed source attribution documentation
 
 ## 🏗️ Architecture
 
@@ -102,15 +110,24 @@ src/
 
 3. **Edit & Customize** - Modify the generated content as needed:
    - Add emojis using the emoji picker
-   - Check character count (max 3,000 characters)
+   - Check character count (max 3,000 characters including attribution)
    - Preview how it looks on LinkedIn
+   - Toggle source attribution on/off
 
 4. **Save & Share** - Use the action buttons to:
-   - Copy to clipboard
+   - Copy to clipboard (with or without attribution)
    - Save as draft
    - Add to favorites
    - Export as text file
    - Generate variations
+
+### Source Attribution Features
+
+- **Automatic Attribution**: Posts automatically include source information
+- **Publication Mapping**: Recognizes 20+ major publications with clean names
+- **Smart Truncation**: Automatically truncates posts if attribution exceeds character limit
+- **User Control**: Toggle attribution on/off as needed
+- **Professional Format**: "Source: [Publication Name]\n[URL]" format
 
 ### Advanced Features
 
@@ -134,8 +151,8 @@ src/
 
 #### Feature Components
 - `UrlInput.tsx` - URL input with validation and error handling
-- `PostEditor.tsx` - Post editing interface with emoji picker
-- `PostPreview.tsx` - LinkedIn-style post preview
+- `PostEditor.tsx` - Post editing interface with emoji picker and attribution controls
+- `PostPreview.tsx` - LinkedIn-style post preview with attribution display
 - `WordCloud.tsx` - Key terms visualization
 - `DraftsPanel.tsx` - Drafts management interface
 - `FavoritesPanel.tsx` - Favorites management interface
@@ -148,7 +165,7 @@ src/
 
 - `useTheme.ts` - Theme management with localStorage persistence
 - `useNotifications.ts` - Toast notifications with auto-dismiss
-- `usePostGeneration.ts` - Post generation with API integration
+- `usePostGeneration.ts` - Post generation with API integration and attribution logic
 - `useDrafts.ts` - Drafts management with localStorage
 - `useFavorites.ts` - Favorites management with localStorage
 - `useRecentUrls.ts` - URL history management

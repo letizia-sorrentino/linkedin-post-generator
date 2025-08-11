@@ -20,6 +20,8 @@ interface MainContentProps {
   onGenerateVariation: () => void;
   onTogglePreview: () => void;
   showPreview: boolean;
+  includeAttribution: boolean;
+  onToggleAttribution: () => void;
 }
 
 export const MainContent: React.FC<MainContentProps> = ({
@@ -37,6 +39,8 @@ export const MainContent: React.FC<MainContentProps> = ({
   onGenerateVariation,
   onTogglePreview,
   showPreview,
+  includeAttribution,
+  onToggleAttribution,
 }) => {
   return (
     <div className="space-y-6">
@@ -58,7 +62,8 @@ export const MainContent: React.FC<MainContentProps> = ({
             <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/20 p-6">
               <PostPreview 
                 generatedPost={generatedPost} 
-                showPreview={showPreview} 
+                showPreview={showPreview}
+                includeAttribution={includeAttribution}
               />
             </div>
           )}
@@ -78,6 +83,8 @@ export const MainContent: React.FC<MainContentProps> = ({
                   onGenerateVariation={onGenerateVariation}
                   onTogglePreview={onTogglePreview}
                   showPreview={showPreview}
+                  includeAttribution={includeAttribution}
+                  onToggleAttribution={onToggleAttribution}
                 />
               </div>
             </div>

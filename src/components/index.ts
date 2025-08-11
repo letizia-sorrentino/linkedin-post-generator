@@ -13,4 +13,5 @@ export { FavoritesPanel } from './features/FavoritesPanel';
 export { RecentUrls } from './features/RecentUrls';
 
 // UI components
-export { Notification } from './ui/Notification'; 
+export { Notification } from './ui/Notification';
+export { LoadingScreen } from './ui/LoadingScreen'; 

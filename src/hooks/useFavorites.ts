@@ -37,6 +37,9 @@ export const useFavorites = () => {
       content: favorite.content,
       timestamp: favorite.timestamp,
       url: favorite.url,
+      includeAttribution: true, // Default to true for loaded favorites
+      attributionText: favorite.url ? `Source: ${favorite.url}` : undefined,
+      isTruncated: false,
     };
   }, []);
 

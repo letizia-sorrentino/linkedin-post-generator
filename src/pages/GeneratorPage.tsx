@@ -26,9 +26,11 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
     generatedPost,
     isLoading,
     error,
+    includeAttribution,
     generatePost,
     generateVariation,
     updatePostContent,
+    toggleAttribution,
     clearError,
   } = usePostGeneration();
   const { drafts, saveDraft, loadDraft, deleteDraft } = useDrafts();
@@ -60,12 +62,19 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
     if (!generatedPost) return;
 
     try {
-      await navigator.clipboard.writeText(generatedPost.content);
+      let contentToCopy = generatedPost.content;
+      
+      // Add attribution if enabled
+      if (includeAttribution && generatedPost.attributionText) {
+        contentToCopy += "\n\n" + generatedPost.attributionText;
+      }
+      
+      await navigator.clipboard.writeText(contentToCopy);
       showNotification("Copied to clipboard!");
     } catch (err) {
       showNotification("Failed to copy to clipboard", "error");
     }
-  }, [generatedPost, showNotification]);
+  }, [generatedPost, includeAttribution, showNotification]);
 
   const handleSaveDraft = useCallback(() => {
     if (!generatedPost) return;
@@ -82,9 +91,17 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
   const handleExportPost = useCallback(() => {
     if (!generatedPost) return;
 
-    const content = `LinkedIn Post - Generated ${generatedPost.timestamp.toLocaleString()}\n\n${
+    let content = `LinkedIn Post - Generated ${generatedPost.timestamp.toLocaleString()}\n\n${
       generatedPost.content
-    }\n\n${generatedPost.url ? `Source: ${generatedPost.url}` : ""}`;
+    }`;
+    
+    // Add attribution if enabled
+    if (includeAttribution && generatedPost.attributionText) {
+      content += `\n\n${generatedPost.attributionText}`;
+    }
+    
+    content += `\n\n${generatedPost.url ? `Source: ${generatedPost.url}` : ""}`;
+    
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -95,9 +112,7 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     showNotification("Post exported successfully!");
-  }, [generatedPost, showNotification]);
-
-
+  }, [generatedPost, includeAttribution, showNotification]);
 
   const handleUrlSelect = useCallback((selectedUrl: string) => {
     setUrl(selectedUrl);
@@ -132,6 +147,8 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
         onGenerateVariation={handleGenerateVariation}
         onTogglePreview={() => setShowPreview(!showPreview)}
         showPreview={showPreview}
+        includeAttribution={includeAttribution}
+        onToggleAttribution={toggleAttribution}
         darkMode={darkMode}
       />
 
