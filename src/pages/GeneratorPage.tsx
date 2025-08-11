@@ -28,7 +28,7 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
     includeAttribution,
     generatePost,
     generateVariation,
-    generateDummyPost,
+    // generateDummyPost,
     updatePostContent,
     toggleAttribution,
     clearError,
@@ -117,14 +117,14 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
     clearError();
   }, [setUrl, clearError]);
 
-  const handleGenerateDummy = useCallback(async () => {
-    const post = generateDummyPost();
-    if (post) {
-      addToRecentUrls(post.url || "");
-      incrementPostsToday();
-      showNotification("Dummy post generated successfully!");
-    }
-  }, [generateDummyPost, addToRecentUrls, incrementPostsToday, showNotification]);
+  // const handleGenerateDummy = useCallback(async () => {
+  //   const post = generateDummyPost();
+  //   if (post) {
+  //     addToRecentUrls(post.url || "");
+  //     incrementPostsToday();
+  //     showNotification("Dummy post generated successfully!");
+  //   }
+  // }, [generateDummyPost, addToRecentUrls, incrementPostsToday, showNotification]);
 
   return (
     <div className="space-y-8">
@@ -139,7 +139,7 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
       <Header darkMode={darkMode} onToggleTheme={onToggleTheme} />
 
       {/* Test Button */}
-      <div className="flex justify-center">
+      {/* <div className="flex justify-center">
         <button
           onClick={handleGenerateDummy}
           disabled={isLoading}
@@ -147,7 +147,7 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
         >
           Generate Test Post
         </button>
-      </div>
+      </div> */}
 
       <MainContent
         url={url}
