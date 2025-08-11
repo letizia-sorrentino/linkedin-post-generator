@@ -15,10 +15,21 @@ class StorageService {
     const data = localStorage.getItem(LOCAL_STORAGE_KEYS.DRAFTS);
     if (!data) return [];
     
-    return this.deserialize<SavedDraft[]>(data).map(draft => ({
-      ...draft,
-      timestamp: new Date(draft.timestamp),
-    }));
+    try {
+      const parsed = this.deserialize<SavedDraft[]>(data);
+      console.log('Raw parsed drafts:', parsed);
+      
+      const result = parsed.map(draft => ({
+        ...draft,
+        timestamp: new Date(draft.timestamp),
+      }));
+      console.log('Processed drafts:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('Error parsing drafts:', error);
+      return [];
+    }
   }
 
   setDrafts(drafts: SavedDraft[]): void {

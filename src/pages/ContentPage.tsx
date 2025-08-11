@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDrafts } from "../hooks/useDrafts";
 import { useFavorites } from "../hooks/useFavorites";
 import { useNotifications } from "../hooks/useNotifications";
@@ -14,6 +14,10 @@ import {
   Star,
   FolderOpen
 } from "lucide-react";
+import { usePost } from "../contexts/PostContext";
+import { useNavigate } from "react-router-dom";
+import { SavedDraft } from "../types";
+import { FavoritePost } from "../types";
 
 interface ContentPageProps {
   darkMode: boolean;
@@ -23,16 +27,38 @@ export const ContentPage: React.FC<ContentPageProps> = ({ darkMode }) => {
   const { drafts, deleteDraft, loadDraft } = useDrafts();
   const { favorites, deleteFavorite, loadFavorite } = useFavorites();
   const { notifications, showNotification, dismissNotification } = useNotifications();
+  const { loadPost, currentPost } = usePost(); // Add currentPost here
+  const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<'drafts' | 'favorites'>('drafts');
 
-  const handleLoadDraft = (draft: any) => {
-    loadDraft(draft);
+  // Debug: Log drafts and favorites when they change
+  useEffect(() => {
+    console.log('ContentPage - Drafts:', drafts.length, drafts);
+    console.log('ContentPage - Favorites:', favorites.length, favorites);
+  }, [drafts, favorites]);
+
+  // Add useEffect to check if current post should be in drafts
+  useEffect(() => {
+    if (currentPost) {
+      // Check if current post is already saved as draft
+      const isDraftSaved = drafts.some(draft => draft.id === currentPost.id);
+      if (!isDraftSaved) {
+        // Optionally show a notification that the current post isn't saved
+        console.log('Current post is not saved as draft');
+      }
+    }
+  }, [currentPost, drafts]);
+
+  const handleLoadDraft = (draft: SavedDraft) => {
+    const loadedPost = loadDraft(draft);
+    loadPost(loadedPost);
+    navigate('/');
     showNotification("Draft loaded successfully!");
   };
 
-  const handleDeleteDraft = (draft: any) => {
-    deleteDraft(draft);
+  const handleDeleteDraft = (draft: SavedDraft) => {
+    deleteDraft(draft.id);
     showNotification("Draft deleted successfully!");
   };
 
@@ -40,12 +66,12 @@ export const ContentPage: React.FC<ContentPageProps> = ({ darkMode }) => {
     try {
       await navigator.clipboard.writeText(content);
       showNotification("Draft copied to clipboard!");
-    } catch (err) {
+    } catch {
       showNotification("Failed to copy draft", "error");
     }
   };
 
-  const handleExportDraft = (draft: any) => {
+  const handleExportDraft = (draft: SavedDraft) => {
     const content = `LinkedIn Draft - ${draft.timestamp.toLocaleString()}\n\n${draft.content}\n\n${draft.url ? `Source: ${draft.url}` : ""}`;
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -59,13 +85,15 @@ export const ContentPage: React.FC<ContentPageProps> = ({ darkMode }) => {
     showNotification("Draft exported successfully!");
   };
 
-  const handleLoadFavorite = (favorite: any) => {
-    loadFavorite(favorite);
+  const handleLoadFavorite = (favorite: FavoritePost) => {
+    const loadedPost = loadFavorite(favorite);
+    loadPost(loadedPost);
+    navigate('/');
     showNotification("Favorite loaded successfully!");
   };
 
-  const handleDeleteFavorite = (favorite: any) => {
-    deleteFavorite(favorite);
+  const handleDeleteFavorite = (favorite: FavoritePost) => {
+    deleteFavorite(favorite.id);
     showNotification("Favorite removed successfully!");
   };
 
@@ -73,12 +101,12 @@ export const ContentPage: React.FC<ContentPageProps> = ({ darkMode }) => {
     try {
       await navigator.clipboard.writeText(content);
       showNotification("Favorite copied to clipboard!");
-    } catch (err) {
+    } catch {
       showNotification("Failed to copy favorite", "error");
     }
   };
 
-  const handleExportFavorite = (favorite: any) => {
+  const handleExportFavorite = (favorite: FavoritePost) => {
     const content = `LinkedIn Favorite - ${favorite.timestamp.toLocaleString()}\n\n${favorite.content}\n\n${favorite.url ? `Source: ${favorite.url}` : ""}`;
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);

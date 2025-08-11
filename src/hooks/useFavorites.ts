@@ -5,17 +5,29 @@ import { truncateText } from '../utils';
 
 export const useFavorites = () => {
   const [favorites, setFavorites] = useState<FavoritePost[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     // Load favorites from localStorage on mount
-    const savedFavorites = storageService.getFavorites();
-    setFavorites(savedFavorites);
+    try {
+      console.log('Loading favorites from localStorage...');
+      const savedFavorites = storageService.getFavorites();
+      console.log('Loaded favorites:', savedFavorites);
+      setFavorites(savedFavorites);
+      setIsLoaded(true);
+    } catch (error) {
+      console.error('Error loading favorites:', error);
+      setFavorites([]);
+      setIsLoaded(true);
+    }
   }, []);
 
   useEffect(() => {
-    // Save favorites to localStorage whenever they change
-    storageService.setFavorites(favorites);
-  }, [favorites]);
+    // Only save favorites to localStorage after initial load
+    if (isLoaded) {
+      storageService.setFavorites(favorites);
+    }
+  }, [favorites, isLoaded]);
 
   const addToFavorites = useCallback((post: GeneratedPost) => {
     const title = truncateText(post.content, 50);
@@ -25,6 +37,9 @@ export const useFavorites = () => {
       timestamp: new Date(),
       url: post.url,
       title: title,
+      includeAttribution: post.includeAttribution,
+      attributionText: post.attributionText,
+      isTruncated: post.isTruncated,
     };
 
     setFavorites(prev => [favorite, ...prev]);
@@ -37,9 +52,9 @@ export const useFavorites = () => {
       content: favorite.content,
       timestamp: favorite.timestamp,
       url: favorite.url,
-      includeAttribution: true, // Default to true for loaded favorites
-      attributionText: favorite.url ? `Source: ${favorite.url}` : undefined,
-      isTruncated: false,
+      includeAttribution: favorite.includeAttribution ?? true,
+      attributionText: favorite.attributionText,
+      isTruncated: favorite.isTruncated ?? false,
     };
   }, []);
 

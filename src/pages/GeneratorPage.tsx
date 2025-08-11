@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from "react";
-import { useTheme } from "../hooks/useTheme";
 import { useNotifications } from "../hooks/useNotifications";
 import { usePostGeneration } from "../hooks/usePostGeneration";
 import { useDrafts } from "../hooks/useDrafts";
@@ -23,20 +22,21 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
   const {
     url,
     setUrl,
-    generatedPost,
+    currentPost,
     isLoading,
     error,
     includeAttribution,
     generatePost,
     generateVariation,
+    generateDummyPost,
     updatePostContent,
     toggleAttribution,
     clearError,
   } = usePostGeneration();
-  const { drafts, saveDraft, loadDraft, deleteDraft } = useDrafts();
-  const { favorites, addToFavorites, loadFavorite, deleteFavorite } = useFavorites();
+  const { saveDraft } = useDrafts();
+  const { addToFavorites } = useFavorites();
   const { recentUrls, addToRecentUrls } = useRecentUrls();
-  const { postsGeneratedToday, incrementPostsToday } = usePostsToday();
+  const { incrementPostsToday } = usePostsToday();
 
   // UI state
   const [showPreview, setShowPreview] = useState(false);
@@ -59,69 +59,75 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
   }, [generateVariation, showNotification]);
 
   const handleCopyToClipboard = useCallback(async () => {
-    if (!generatedPost) return;
+    if (!currentPost) return;
 
     try {
-      let contentToCopy = generatedPost.content;
+      let contentToCopy = currentPost.content;
       
-      // Add attribution if enabled
-      if (includeAttribution && generatedPost.attributionText) {
-        contentToCopy += "\n\n" + generatedPost.attributionText;
+      if (includeAttribution && currentPost.attributionText) {
+        contentToCopy += "\n\n" + currentPost.attributionText;
       }
       
       await navigator.clipboard.writeText(contentToCopy);
       showNotification("Copied to clipboard!");
-    } catch (err) {
+    } catch {
       showNotification("Failed to copy to clipboard", "error");
     }
-  }, [generatedPost, includeAttribution, showNotification]);
+  }, [currentPost, includeAttribution, showNotification]);
 
   const handleSaveDraft = useCallback(() => {
-    if (!generatedPost) return;
-    saveDraft(generatedPost);
+    if (!currentPost) return;
+    saveDraft(currentPost);
     showNotification("Draft saved successfully!");
-  }, [generatedPost, saveDraft, showNotification]);
+  }, [currentPost, saveDraft, showNotification]);
 
   const handleAddToFavorites = useCallback(() => {
-    if (!generatedPost) return;
-    addToFavorites(generatedPost);
+    if (!currentPost) return;
+    addToFavorites(currentPost);
     showNotification("Added to favorites!");
-  }, [generatedPost, addToFavorites, showNotification]);
+  }, [currentPost, addToFavorites, showNotification]);
 
   const handleExportPost = useCallback(() => {
-    if (!generatedPost) return;
+    if (!currentPost) return;
 
-    let content = `LinkedIn Post - Generated ${generatedPost.timestamp.toLocaleString()}\n\n${
-      generatedPost.content
+    let content = `LinkedIn Post - Generated ${currentPost.timestamp.toLocaleString()}\n\n${
+      currentPost.content
     }`;
     
-    // Add attribution if enabled
-    if (includeAttribution && generatedPost.attributionText) {
-      content += `\n\n${generatedPost.attributionText}`;
+    if (includeAttribution && currentPost.attributionText) {
+      content += `\n\n${currentPost.attributionText}`;
     }
     
-    content += `\n\n${generatedPost.url ? `Source: ${generatedPost.url}` : ""}`;
+    content += `\n\n${currentPost.url ? `Source: ${currentPost.url}` : ""}`;
     
     const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
+    const downloadUrl = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url;
+    a.href = downloadUrl;
     a.download = `linkedin-post-${Date.now()}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    URL.revokeObjectURL(downloadUrl);
     showNotification("Post exported successfully!");
-  }, [generatedPost, includeAttribution, showNotification]);
+  }, [currentPost, includeAttribution, showNotification]);
 
   const handleUrlSelect = useCallback((selectedUrl: string) => {
     setUrl(selectedUrl);
     clearError();
   }, [setUrl, clearError]);
 
+  const handleGenerateDummy = useCallback(async () => {
+    const post = generateDummyPost();
+    if (post) {
+      addToRecentUrls(post.url || "");
+      incrementPostsToday();
+      showNotification("Dummy post generated successfully!");
+    }
+  }, [generateDummyPost, addToRecentUrls, incrementPostsToday, showNotification]);
+
   return (
     <div className="space-y-8">
-      {/* Notifications */}
       {notifications.map((notification) => (
         <Notification
           key={notification.id}
@@ -132,13 +138,24 @@ export const GeneratorPage: React.FC<GeneratorPageProps> = ({ darkMode, onToggle
 
       <Header darkMode={darkMode} onToggleTheme={onToggleTheme} />
 
+      {/* Test Button */}
+      <div className="flex justify-center">
+        <button
+          onClick={handleGenerateDummy}
+          disabled={isLoading}
+          className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Generate Test Post
+        </button>
+      </div>
+
       <MainContent
         url={url}
         onUrlChange={setUrl}
         onGenerate={handleGeneratePost}
         isLoading={isLoading}
         error={error}
-        generatedPost={generatedPost}
+        generatedPost={currentPost}
         onContentChange={updatePostContent}
         onCopy={handleCopyToClipboard}
         onSaveDraft={handleSaveDraft}

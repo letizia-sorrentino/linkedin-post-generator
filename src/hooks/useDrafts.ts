@@ -5,17 +5,29 @@ import { truncateText } from '../utils';
 
 export const useDrafts = () => {
   const [drafts, setDrafts] = useState<SavedDraft[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     // Load drafts from localStorage on mount
-    const savedDrafts = storageService.getDrafts();
-    setDrafts(savedDrafts);
+    try {
+      console.log('Loading drafts from localStorage...');
+      const savedDrafts = storageService.getDrafts();
+      console.log('Loaded drafts:', savedDrafts);
+      setDrafts(savedDrafts);
+      setIsLoaded(true);
+    } catch (error) {
+      console.error('Error loading drafts:', error);
+      setDrafts([]);
+      setIsLoaded(true);
+    }
   }, []);
 
   useEffect(() => {
-    // Save drafts to localStorage whenever they change
-    storageService.setDrafts(drafts);
-  }, [drafts]);
+    // Only save drafts to localStorage after initial load
+    if (isLoaded) {
+      storageService.setDrafts(drafts);
+    }
+  }, [drafts, isLoaded]);
 
   const saveDraft = useCallback((post: GeneratedPost) => {
     const title = truncateText(post.content, 50);
@@ -25,6 +37,9 @@ export const useDrafts = () => {
       timestamp: new Date(),
       url: post.url,
       title: title,
+      includeAttribution: post.includeAttribution,
+      attributionText: post.attributionText,
+      isTruncated: post.isTruncated,
     };
 
     setDrafts(prev => [draft, ...prev]);
@@ -37,9 +52,9 @@ export const useDrafts = () => {
       content: draft.content,
       timestamp: draft.timestamp,
       url: draft.url,
-      includeAttribution: true, // Default to true for loaded drafts
-      attributionText: draft.url ? `Source: ${draft.url}` : undefined,
-      isTruncated: false,
+      includeAttribution: draft.includeAttribution ?? true,
+      attributionText: draft.attributionText,
+      isTruncated: draft.isTruncated ?? false,
     };
   }, []);
 

@@ -5,6 +5,7 @@ import { useNotifications } from "./hooks/useNotifications";
 import { usePostsToday } from "./hooks/usePostsToday";
 import { useDrafts } from "./hooks/useDrafts";
 import { useFavorites } from "./hooks/useFavorites";
+import { PostProvider } from "./contexts/PostContext";
 
 import { Sidebar } from "./components/layout/Sidebar";
 import { Footer } from "./components/layout/Footer";
@@ -62,61 +63,63 @@ const SidebarWrapper: React.FC<{ darkMode: boolean; onToggleTheme: () => void }>
 function App() {
   // Custom hooks
   const { darkMode, toggleTheme } = useTheme();
-  const { notifications, showNotification, dismissNotification } = useNotifications();
+  const { notifications, dismissNotification } = useNotifications();
 
   return (
-    <Router>
-      <div
-        className={`h-screen transition-colors duration-300 ${
-          darkMode
-            ? "dark bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
-            : "bg-gradient-to-br from-blue-50 via-white to-indigo-50"
-        }`}
-      >
-        {/* Notifications */}
-        {notifications.map((notification) => (
-          <Notification
-            key={notification.id}
-            notification={notification}
-            onDismiss={dismissNotification}
-          />
-        ))}
+    <PostProvider>
+      <Router>
+        <div
+          className={`h-screen transition-colors duration-300 ${
+            darkMode
+              ? "dark bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
+              : "bg-gradient-to-br from-blue-50 via-white to-indigo-50"
+          }`}
+        >
+          {/* Notifications */}
+          {notifications.map((notification) => (
+            <Notification
+              key={notification.id}
+              notification={notification}
+              onDismiss={dismissNotification}
+            />
+          ))}
 
-        <div className="flex h-screen">
-          {/* Sidebar */}
-          <SidebarWrapper darkMode={darkMode} onToggleTheme={toggleTheme} />
+          <div className="flex h-screen">
+            {/* Sidebar */}
+            <SidebarWrapper darkMode={darkMode} onToggleTheme={toggleTheme} />
 
-          {/* Main Content Area */}
-          <div className="flex-1 overflow-auto flex flex-col">
-            <div className="flex-1 container mx-auto px-4 py-8 pt-16 lg:pt-8 max-w-4xl lg:max-w-5xl">
-              <Routes>
-                <Route 
-                  path="/" 
-                  element={<GeneratorPage darkMode={darkMode} onToggleTheme={toggleTheme} />} 
-                />
-                <Route 
-                  path="/content" 
-                  element={<ContentPage darkMode={darkMode} />} 
-                />
-                <Route 
-                  path="/knowledge-base" 
-                  element={<KnowledgeBasePage darkMode={darkMode} />} 
-                />
-                <Route 
-                  path="/stats" 
-                  element={<StatsPage darkMode={darkMode} />} 
-                />
-                <Route 
-                  path="/tips" 
-                  element={<TipsPage darkMode={darkMode} />} 
-                />
-              </Routes>
+            {/* Main Content Area */}
+            <div className="flex-1 overflow-auto flex flex-col">
+              <div className="flex-1 container mx-auto px-4 py-8 pt-16 lg:pt-8 max-w-4xl lg:max-w-5xl">
+                <Routes>
+                  <Route 
+                    path="/" 
+                    element={<GeneratorPage darkMode={darkMode} onToggleTheme={toggleTheme} />} 
+                  />
+                  <Route 
+                    path="/content" 
+                    element={<ContentPage darkMode={darkMode} />} 
+                  />
+                  <Route 
+                    path="/knowledge-base" 
+                    element={<KnowledgeBasePage darkMode={darkMode} />} 
+                  />
+                  <Route 
+                    path="/stats" 
+                    element={<StatsPage darkMode={darkMode} />} 
+                  />
+                  <Route 
+                    path="/tips" 
+                    element={<TipsPage darkMode={darkMode} />} 
+                  />
+                </Routes>
+              </div>
+              <Footer darkMode={darkMode} />
             </div>
-            <Footer darkMode={darkMode} />
           </div>
         </div>
-      </div>
-    </Router>
+      </Router>
+    </PostProvider>
   );
 }
 

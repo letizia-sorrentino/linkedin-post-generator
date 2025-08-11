@@ -14,6 +14,9 @@ export interface SavedDraft {
   timestamp: Date;
   url?: string;
   title: string;
+  includeAttribution?: boolean;
+  attributionText?: string;
+  isTruncated?: boolean;
 }
 
 export interface FavoritePost {
@@ -22,6 +25,9 @@ export interface FavoritePost {
   timestamp: Date;
   url?: string;
   title: string;
+  includeAttribution?: boolean;
+  attributionText?: string;
+  isTruncated?: boolean;
 }
 
 export interface RecentUrl {

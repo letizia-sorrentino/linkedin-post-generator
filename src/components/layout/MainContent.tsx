@@ -22,6 +22,7 @@ interface MainContentProps {
   showPreview: boolean;
   includeAttribution: boolean;
   onToggleAttribution: () => void;
+  darkMode: boolean;
 }
 
 export const MainContent: React.FC<MainContentProps> = ({
